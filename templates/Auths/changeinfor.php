@@ -4,6 +4,9 @@
         <div class="col-md-6 mx-auto">
             <form action="" method="post">
                 <?php foreach ($get_user as $user) { ?>
+                    <div class="text-center">
+                        <img src="/img/avatar/<?= $user->avatar ?>" alt="" class="rounded-circle">
+                    </div>
                     <div class="form-group">
                         <label for="">Email</label>
                         <input type="text" class="form-control" name="email" readonly value="<?= $user->email ?>">

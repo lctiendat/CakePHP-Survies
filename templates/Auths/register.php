@@ -1,5 +1,8 @@
 <?php
 $this->disableAutoLayout();
+if (!isset($_SESSION)) {
+    session_start();
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -20,7 +23,12 @@ $this->disableAutoLayout();
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- Custom styles for this template-->
     <link href="/css/admin/sb-admin-2.min.css" rel="stylesheet">
-
+    <style>
+        .error {
+            font-size: 13px;
+            color: red;
+        }
+    </style>
 </head>
 
 <body class="bg-gradient-primary">
@@ -37,22 +45,35 @@ $this->disableAutoLayout();
                             <div class="text-center">
                                 <h1 class="h4 text-gray-900 mb-4">Create an Account!</h1>
                             </div>
-                            <!-- <form class="user" action="/Auth/register" method="post"> -->
+                            <?php if (isset($_SESSION['success'])) { ?>
+                                <div class="alert alert-success">
+                                    <strong>Success!</strong> <?= $_SESSION['success'] ?>
+                                </div>
+                            <?php }
+                            unset($_SESSION['success']) ?>
                             <form class="user" action="" method="post">
-
                                 <div class="form-group">
                                     <input type="email" class="form-control form-control-user" name="email" id="exampleInputEmail" placeholder="Email Address">
                                 </div>
+                                <?php if (isset($errors)) { ?>
+                                    <p class="error"><?= reset($errors['email']); ?></p>
+                                    <?php } ?>
                                 <div class="form-group">
                                     <input type="number" class="form-control form-control-user" name="phone" id="exampleInputEmail" placeholder="Your Phone">
                                 </div>
+                                <?php if (isset($errors)) { ?>
+                                    <p class="error"><?= reset($errors['phone']); ?></p>
+                                <?php } ?>
                                 <div class="form-group row">
-                                    <div class="col-sm-6 mb-3 mb-sm-0">
+                                    <div class="col-sm-12 mb-3 mb-sm-0">
                                         <input type="password" class="form-control form-control-user" name="password" id="exampleInputPassword" placeholder="Password">
                                     </div>
-                                    <div class="col-sm-6">
+                                    <?php if (isset($errors)) { ?>
+                                        <p><?= reset($errors['password'][0]) ?></p>
+                                    <?php } ?>
+                                    <!-- <div class="col-sm-6">
                                         <input type="password" class="form-control form-control-user" name="re_password" id="exampleRepeatPassword" placeholder="Repeat Password">
-                                    </div>
+                                    </div> -->
                                 </div>
                                 <input type="hidden" name="created" value="<?= date('Y-m-d h:m:s') ?>">
                                 <input type="hidden" name="modified" value="<?= date('Y-m-d h:m:s') ?>">
@@ -68,11 +89,11 @@ $this->disableAutoLayout();
                                 </a>
                             </form>
                             <hr>
-                            <div class="text-center">
+                            <!-- <div class="text-center">
                                 <a class="small" href="forgot-password.html">Forgot Password?</a>
-                            </div>
+                            </div> -->
                             <div class="text-center">
-                                <a class="small" href="login.html">Already have an account? Login!</a>
+                                <a class="small" href="/Auth/login">Already have an account? Login!</a>
                             </div>
                         </div>
                     </div>
@@ -91,7 +112,7 @@ $this->disableAutoLayout();
 
     <!-- Custom scripts for all pages-->
     <script src="/js/admin/sb-admin-2.min.js"></script>
-    <script>
+    <!-- <script>
         $(document).ready(() => {
             $('button[type="submit"]').click((e) => {
                 e.preventDefault()
@@ -109,13 +130,13 @@ $this->disableAutoLayout();
                     Swal.fire({
                         icon: 'error',
                         title: 'Oops...',
-                        text: 'Phone chưa được điền!',
+                        text: 'Phone chưa được điền',
                     })
                 } else if (password == '') {
                     Swal.fire({
                         icon: 'error',
                         title: 'Oops...',
-                        text: 'Passwword chưa được điền!',
+                        text: 'Passwword chưa được điền',
                     })
                 } else if (repassword == '') {
                     Swal.fire({
@@ -131,20 +152,22 @@ $this->disableAutoLayout();
                     })
                 } else {
                     $.ajax({
-                        url: '/Auth/register',
+                        url: 'https://lctiendat.vn/Auth/register',
                         type: 'POST',
-                        dataType: 'json',
+                        cache: false,
                         data: {
                             email: email,
                             phone: phone,
                             password: password,
                         },
                         success(response) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Oops...',
-                                text: 'ok',
-                            })
+                            var getData = JSON.parse(JSON.stringify(response))
+                            // Swal.fire({
+                            //     icon: 'success',
+                            //     title: 'Oops...',
+                            //     text: 'ok',
+                            // })
+                            console.log(getData)
                         },
                         error(response) {
                             Swal.fire({
@@ -152,12 +175,14 @@ $this->disableAutoLayout();
                                 title: 'Oops...',
                                 text: 'cc',
                             })
+                            console.log(response)
+
                         },
                     })
                 }
             })
         })
-    </script>
+    </script> -->
 </body>
 
 </html>

@@ -39,6 +39,7 @@ class User extends Entity
         'avatar' => true,
         'password' => true,
         'address' => true,
+        'token' => true,
         'status' => true,
         'role' => true,
         'created' => true,

@@ -40,6 +40,11 @@ class CreateUsers extends AbstractMigration
             'limit' => 255,
             'null' => true,
         ]);
+        $table->addColumn('token', 'string', [
+            'default' => null,
+            'limit' => 255,
+            'null' => true,
+        ]);
         $table->addColumn('status', 'integer', [
             'default' => 1,
             'limit' => 1,

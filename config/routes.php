@@ -72,17 +72,23 @@ $routes->scope('/', function (RouteBuilder $builder) {
 
     $builder->connect('/admin', 'Admin::index');
 
-    $builder->connect('/Auth/register', 'Users::register');
-    $builder->connect('/Auth/login', 'Users::login');
-    $builder->connect('/Auth/logout', 'Users::logout');
-    $builder->connect('/Auth/change', 'Users::changeinfor');
+    //Auth
+    $builder->connect('/Auth/register', 'Auths::register');
+    $builder->connect('/Auth/login', 'Auths::login');
+    $builder->connect('/Auth/logout', 'Auths::logout');
+    $builder->connect('/Auth/change', 'Auths::changeinfor');
+    $builder->connect('/Auth/forget', 'Auths::forget');
+    $builder->connect('/Auth/renew', 'Auths::renewPassword');
+    $builder->connect('/Auth/testmail', 'Auths::testmail');
 
+    //
 
     $builder->connect('/', 'Homes::index');
     $builder->connect('/category/:id', ['controller' => 'Homes', 'action' => 'getSurviesByCategory'], ['pass' => ['id']]);
     $builder->connect('/result/save/:id_survey', 'Homes::getDataSubmit', ['pass' => ['id_survey']]);
     $builder->connect('/category/:id_category/question/:id_question', ['controller' => 'Homes', 'action' => 'showQuestion'], ['pass' => ['id_category', 'id_question']]);
     $builder->connect('/result/saveNoLogin/:id_survey', 'Homes::getResultDontLogin', ['pass' => ['id_survey']]);
+    $builder->connect('/img/avatar/*', 'Users::changeinfor');
 
     /*
      * Connect catchall routes for all controllers.

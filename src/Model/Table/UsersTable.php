@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Model\Table;
@@ -67,11 +68,11 @@ class UsersTable extends Table
         $validator
             ->integer('id')
             ->allowEmptyString('id', null, 'create');
-
+     
         $validator
             ->email('email')
             ->requirePresence('email', 'create')
-            ->notEmptyString('email');
+            ->notEmptyString('email','hihi');
 
         $validator
             ->scalar('phone')
@@ -94,7 +95,10 @@ class UsersTable extends Table
             ->scalar('address')
             ->maxLength('address', 255)
             ->allowEmptyString('address');
-
+        $validator
+            ->scalar('token')
+            ->maxLength('token', 255)
+            ->allowEmptyString('token');
         $validator
             ->integer('status')
             ->notEmptyString('status');

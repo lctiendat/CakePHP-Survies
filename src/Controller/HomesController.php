@@ -34,8 +34,8 @@ class HomesController extends AppController
         //  dd( TableRegistry::getTableLocator()->get('Answers')->find()->select('survey_id')->all());
         $get_Survies = TableRegistry::getTableLocator()->get('Survies');
         $survies  = $this->paginate($get_Survies->find()->where(['category_id' => $id])
-        ->where(['id IN' => TableRegistry::getTableLocator()->get('Answers')->find()
-        ->select('survey_id')]), ['limit' => 6]);
+            ->where(['id IN' => TableRegistry::getTableLocator()->get('Answers')->find()
+                ->select('survey_id')]), ['limit' => 6]);
         $categories = $this->getTable('Categories');
         $topposts = TableRegistry::getTableLocator()->get('Survies')->find('all')->order(['id DESC'])->limit(5);
         $getCategoryForId = TableRegistry::getTableLocator()->get('Categories')->find()->where(['id' => $id]);
@@ -61,16 +61,22 @@ class HomesController extends AppController
     }
     public function getDataSubmit($id_survey)
     {
-        $save_result = TableRegistry::getTableLocator()->get('Results')->query();
         $session = $this->request->getSession();
         if ($this->request->is('post')) {
-            $survy_id = $id_survey;
-            $answer_id =  $this->request->getData('answer_id');
             $user_id = $session->read('user_id');
-            $save_result->insert(['survey_id', 'answer_id', 'user_id', 'created', 'modified'])
-                ->values(['survey_id' => $survy_id, 'answer_id' => $answer_id, 'user_id' => $user_id, 'created' => date('Y-m-d H:m:s'), 'modified' => date('Y-m-d H:m:s')])
-                ->execute();
-            $this->redirect('/');
+            $answer_id =  $this->request->getData('answer_id');
+            $check_result = TableRegistry::getTableLocator()->get('Results')->find()->where(['survey_id' => $id_survey])->where(['user_id' => $user_id])->all();
+            if (count($check_result) > 0) {
+                $save_result = TableRegistry::getTableLocator()->get('Results')->query();
+                $save_result->update()->set(['answer_id' => $answer_id])->where(['survey_id' => $id_survey])->where(['user_id' => $user_id])->execute();
+                echo '<script>alert("Cập nhật câu trả lời thành công") </script>';
+            } else {
+                $save_result1 = TableRegistry::getTableLocator()->get('Results')->query();
+                $save_result1->insert(['survey_id', 'answer_id', 'user_id', 'created', 'modified'])
+                    ->values(['survey_id' => $id_survey, 'answer_id' => $answer_id, 'user_id' => $user_id, 'created' => date('Y-m-d H:m:s'), 'modified' => date('Y-m-d H:m:s')])
+                    ->execute();
+                echo '<script>alert("Chọn câu trả lời thành công") </script>';
+            }
         }
     }
     public function getResultDontLogin($id_survey)
