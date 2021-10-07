@@ -45,38 +45,32 @@ if (!isset($_SESSION)) {
                             <div class="text-center">
                                 <h1 class="h4 text-gray-900 mb-4">Create an Account!</h1>
                             </div>
-                            <?php if (isset($_SESSION['success'])) { ?>
-                                <div class="alert alert-success">
-                                    <strong>Success!</strong> <?= $_SESSION['success'] ?>
-                                </div>
-                            <?php }
-                            unset($_SESSION['success']) ?>
+                            <?= $this->Flash->render() ?>
                             <form class="user" action="" method="post">
                                 <div class="form-group">
                                     <input type="email" class="form-control form-control-user" name="email" id="exampleInputEmail" placeholder="Email Address">
                                 </div>
-                                <?php if (isset($errors)) { ?>
+                                <?php if (isset($errors['email'])) { ?>
                                     <p class="error"><?= reset($errors['email']); ?></p>
-                                    <?php } ?>
+                                <?php } ?>
                                 <div class="form-group">
                                     <input type="number" class="form-control form-control-user" name="phone" id="exampleInputEmail" placeholder="Your Phone">
                                 </div>
-                                <?php if (isset($errors)) { ?>
+                                <?php if (isset($errors['phone'])) { ?>
                                     <p class="error"><?= reset($errors['phone']); ?></p>
                                 <?php } ?>
                                 <div class="form-group row">
                                     <div class="col-sm-12 mb-3 mb-sm-0">
                                         <input type="password" class="form-control form-control-user" name="password" id="exampleInputPassword" placeholder="Password">
                                     </div>
-                                    <?php if (isset($errors)) { ?>
-                                        <p><?= reset($errors['password'][0]) ?></p>
-                                    <?php } ?>
+                                    <?php if (isset($_SESSION['errorPassword'])) { ?>
+                                        <p class="error ml-2 mt-2"><?= $_SESSION['errorPassword']; ?></p>
+                                    <?php }
+                                    unset($_SESSION['errorPassword']) ?>
                                     <!-- <div class="col-sm-6">
                                         <input type="password" class="form-control form-control-user" name="re_password" id="exampleRepeatPassword" placeholder="Repeat Password">
                                     </div> -->
                                 </div>
-                                <input type="hidden" name="created" value="<?= date('Y-m-d h:m:s') ?>">
-                                <input type="hidden" name="modified" value="<?= date('Y-m-d h:m:s') ?>">
                                 <button type="submit" class="btn btn-primary btn-user btn-block">
                                     Register Account
                                 </button>

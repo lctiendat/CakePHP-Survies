@@ -20,6 +20,11 @@ class Categories extends AbstractMigration
             'limit' => 255,
             'null' => false,
         ]);
+        $table->addColumn('DELETE_FLG', 'integer', [
+            'default' => 0,
+            'limit' => 1,
+            'null' => false,
+        ]);
         $table->addColumn('created', 'datetime', [
             'default' => null,
             'null' => false,

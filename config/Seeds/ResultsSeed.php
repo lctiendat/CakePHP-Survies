@@ -20,16 +20,16 @@ class ResultsSeed extends AbstractSeed
      */
     public function run()
     {
-        for ($i = 0; $i < 10; $i++) {
-            $data = [
-                'survey_id' => rand(1, 10),
-                'answer_id' => rand(1, 10),
-                'user_id' => rand(1, 10),
-                'created'=>  date('Y-m-d h:m:s'),
-                'modified'=>  date('Y-m-d h:m:s'),
-            ];
-            $table = $this->table('results');
-            $table->insert($data)->save();
-        }
+    //     for ($i = 0; $i < 10; $i++) {
+    //         $data = [
+    //             'survey_id' => rand(1, 10),
+    //             'answer_id' => rand(1, 10),
+    //             'user_id' => rand(1, 10),
+    //             'created'=>  date('Y-m-d h:m:s'),
+    //             'modified'=>  date('Y-m-d h:m:s'),
+    //         ];
+    //         $table = $this->table('results');
+    //         $table->insert($data)->save();
+    //     }
     }
 }

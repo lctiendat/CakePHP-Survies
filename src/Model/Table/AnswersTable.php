@@ -48,7 +48,7 @@ class AnswersTable extends Table
 
         $this->addBehavior('Timestamp');
 
-        $this->belongsTo('Surveys', [
+        $this->belongsTo('Survies', [
             'foreignKey' => 'survey_id',
             'joinType' => 'INNER',
         ]);
@@ -74,7 +74,7 @@ class AnswersTable extends Table
             ->maxLength('name', 255)
             ->requirePresence('name', 'create')
             ->notEmptyString('name');
-
+        
         $validator
             ->integer('DELETE_FLG')
             ->notEmptyString('DELETE_FLG');
@@ -91,7 +91,7 @@ class AnswersTable extends Table
      */
     public function buildRules(RulesChecker $rules): RulesChecker
     {
-        $rules->add($rules->existsIn(['survey_id'], 'Surveys'), ['errorField' => 'survey_id']);
+        // $rules->add($rules->existsIn(['survey_id'], 'Surveys'), ['errorField' => 'survey_id']);
 
         return $rules;
     }

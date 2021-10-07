@@ -68,17 +68,17 @@ class UsersTable extends Table
         $validator
             ->integer('id')
             ->allowEmptyString('id', null, 'create');
-     
-        $validator
-            ->email('email')
-            ->requirePresence('email', 'create')
-            ->notEmptyString('email','hihi');
 
         $validator
-            ->scalar('phone')
-            ->maxLength('phone', 10)
+            ->email('email')
+            ->requirePresence('email', 'create', 'Email đã tồn tại trong hệ thống')
+            ->notEmptyString('email', 'Email không được để trống');
+
+        $validator
+            ->maxLength('phone', 10, 'Số điện thoại không được quá 10 số')
+            ->minLength('phone', 9, 'Số điện thoại ít nhất là 9 số')
             ->requirePresence('phone', 'create')
-            ->notEmptyString('phone');
+            ->notEmptyString('phone', 'Số điện thoại không được để trống');
 
         $validator
             ->scalar('avatar')
@@ -89,7 +89,7 @@ class UsersTable extends Table
             ->scalar('password')
             ->maxLength('password', 50)
             ->requirePresence('password', 'create')
-            ->notEmptyString('password');
+            ->notEmptyString('password', 'Mật khẩu không được để trống');
 
         $validator
             ->scalar('address')
@@ -120,7 +120,7 @@ class UsersTable extends Table
     public function buildRules(RulesChecker $rules): RulesChecker
     {
         $rules->add($rules->isUnique(['email']), ['errorField' => 'email']);
-
+        $rules->add($rules->isUnique(['phone']), ['errorField' => 'phone'], ['message' => 'Số điện thoại đã tồn tại trong hệ thống.']);
         return $rules;
     }
 }

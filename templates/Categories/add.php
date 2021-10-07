@@ -8,10 +8,14 @@ echo $this->element('admin/header') ?>
         <div class="col-md-5 mx-auto">
             <div class="card p-5">
                 <p> <?= $this->Flash->render() ?></p>
-                <?= $this->Form->create($category) ?>
+                <h5>Thêm Category</h5>
+                <form action="" method="post">
                     <div class="form-group">
                         <label for="">Name</label>
                         <input type="text" class="form-control" name="name">
+                        <?php if (isset($errors['name'])) { ?>
+                            <p class="error"><?= reset($errors['name']); ?></p>
+                        <?php } ?>
                     </div>
                     <div class="form-group">
                         <button type="submit" class="btn btn-primary">Add</button>

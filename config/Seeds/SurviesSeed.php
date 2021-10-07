@@ -27,6 +27,7 @@ class SurviesSeed extends AbstractSeed
                 'description' => 'description',
                 'category_id' => 1,
                 'user_id' => 1,
+                'type_select'=>rand(1,2),
                 'created'=>  date('Y-m-d h:m:s'),
                 'modified'=>  date('Y-m-d h:m:s'),
             ];

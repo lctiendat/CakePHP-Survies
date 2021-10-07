@@ -1,309 +1,233 @@
 <?= $this->element('user/header') ?>
-<div class="container mb-30px">
-    <div class="row">
-        <div class="col-md-12 text-center">
-            <?php foreach ($getCategoryForId as $item) { ?>
-                <h5 class="widget-title text-uppercase"><?= $item->name ?></h5>
-            <?php } ?>
-        </div>
-        <div class="row">
-            <div class="col-lg-8">
-                <div class="row blog_posts cardPostStyle">
-                    <?php foreach ($survies as $survy) {
-                    ?>
-                        <div class="col-md-6 col-lg-6">
-                            <article>
-                                <div class="post_img">
-                                    <img src="https://www.energeticthemes.com/templates/sada/images/home1/1.jpg" alt="Card image cap">
-                                </div>
-                                <div class="post_text">
-                                    <div class="post_meta_top">
-                                        <span class="post_meta_category">
-                                            <a href="blog-standard-two-col-right-sidebar.html">FOOD, TRAVEL</a>
-                                        </span>
-                                        <span class="post_meta_date"><?= date_format($survy->created, 'F d-y') ?></span>
-                                    </div>
-                                    <h5 class="post_title">
-                                        <a href="blog-single-post.html"><?= $survy->question ?>
-                                        </a>
-                                    </h5>
-                                    <div class="post_content">
-                                        <p><?= $survy->description ?> </p>
-                                    </div>
-                                </div>
-                            </article>
+<?php
+$nameCategory = '';
+foreach ($getCategoryForId as $item) {
+    $nameCategory = $item->name;
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous" />
+    <style>
+        body {
+            background-image: linear-gradient(to bottom, white, #F8F8FF);
+        }
+
+        .banner h1 {
+            font-weight: bolder;
+            font-size: 50px;
+        }
+
+        .banner p {
+            letter-spacing: 6px;
+            font-size: 38px;
+            font-weight: bolder;
+        }
+
+        .banner button {
+            background-image: linear-gradient(-30deg, #DC2424, #4A569D);
+            padding: 16px 48px;
+            border-radius: 50px;
+            border: none;
+            color: #fff;
+            box-shadow: 5px 5px 20px 0 rgb(0 0 0 / 20%);
+            text-transform: uppercase;
+            font-weight: 600;
+            font-size: 14px;
+            white-space: nowrap;
+            margin-top: 50px;
+        }
+
+        button:focus,
+        input:focus {
+            outline: none;
+        }
+
+        nav li a {
+            color: white !important;
+            font-size: 14px;
+        }
+
+        .next,
+        .prev {
+            border: 1px solid red;
+            background-image: linear-gradient(-30deg, #DC2424, #4A569D);
+            padding: 5px 10px;
+            border: 0;
+        }
+
+        .next a,
+        .prev a {
+            text-decoration: none;
+            color: white;
+        }
+
+        .next {
+            margin-left: 10px;
+        }
+
+        .disabled {
+            background: gray !important;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container-fluid" style="margin-top: 100px;">
+        <div class="row p-5">
+            <div class="col-md-12">
+                <?= $this->Flash->render() ?>
+                <div class="card p-5" style="background:#F8F8FF;border-radius: 30px;border: 0;">
+                    <div class="row banner">
+                        <div class="col-md-6">
+                            <h1> NỀN TẢNG <span style="color: #26ba99;">KHẢO SÁT</span> </h1>
+                            <p>Ngiên cứu thị trường</p>
+                            <span style="color: darkgrey;">Chúng tôi chuyên khảo sát thị trường </span> </br>
+                            <a href="#survey"><button>Tham gia khảo sát</button></a>
                         </div>
-                    <?php } ?>
+                        <div class="col-md-6 text-center">
+                            <img src="https://khaosat.me/assets/images/landing_page_top_image.webp?v=2021-10-02-04-05" width="70%" alt="">
+                        </div>
+                    </div>
                 </div>
-                <nav class="pagination_holder">
-                    <!-- <ul class="pagination">
-                    <li class="page-item active">
-                        <a class="page-link" href="#">1</a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="#">2</a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="#">3</a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="#">3</a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="#" aria-label="Next">
-                            <span>
-                                >
-                            </span>
-                            <span class="sr-only">Next</span>
+            </div>
+
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <center>
+                    <h1 style="font-size:32px;text-transform: uppercase;font-weight: bolder;"> khảo sát về <?= $nameCategory ?> </h1>
+                </center>
+                <center>
+                    <div style="width: 100px; height: 10px;background: #26ba99;border-radius: 5px;"></div>
+                </center>
+            </div>
+        </div>
+       
+        <div class="row mt-5" id="survey">
+            <?php foreach ($survies as $survy) {
+            ?>
+                <div class="col-md-4 mt-5">
+                    <div class="card p-4" style="border-radius: 30px ;border: 0;box-shadow: 5px 5px 50px rgb(0 0 0 / 10%);">
+                        <span style="color: #424242;border-left: 5px solid #26ba99;border-spacing: 15px;
+                   "> <span class="ml-2" style="font-size: 14px;"><?= $survy->category ?></span></span>
+                        <a href="/category/<?= $survy->category_id ?>/question/<?= $survy->id ?>" class="text-decoration-none">
+                            <h6 class="pt-3 pb-4 mt-2" style="font-weight: bolder;color:black;"><?= $survy->question ?></h6>
                         </a>
-                    </li>
-                </ul> -->
-                    <ul class="pagination">
+                    </div>
+                </div>
+            <?php } ?>
+
+        </div>
+        <?php if (count($survies) > 6) { ?>
+            <div class="row mb-5">
+                <div class="col-md-12">
+                    <ul class="pagination mt-5 justify-content-end">
                         <?= $this->Paginator->prev("<<") ?>
-                        <?= $this->Paginator->numbers() ?>
                         <?= $this->Paginator->next(">>") ?>
                     </ul>
-                </nav>
-            </div>
-
-            <div class="col-lg-4 mt-30px mt-lg-0">
-                <div class="widget">
-                    <form role="search" class="search-form dark-outline-form">
-                        <div class="input-group">
-                            <input type="text" class="form-control" placeholder="Search" name="q">
-                            <div class="input-group-btn">
-                                <button class="btn" type="submit">
-                                    <i class="fa fa-search" aria-hidden="true"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div class="bg-color-grayflame widget pt-30px pb-30px px-30px">
-                    <h5 class="widget-title">Categories</h5>
-                    <ul class="category-list list-unstyled mb-0">
-                        <?php foreach ($categories as $category) { ?>
-                            <li>
-                                <a href="/category/<?= $category->id ?>">
-                                    <?= $category->name ?>
-                                </a>
-                            </li>
-                        <?php } ?>
-                    </ul>
-                </div>
-                <div class="widget bg-color-grayflame pt-30px pb-30px px-30px">
-                    <h5 class="widget-title">Top Posts</h5>
-                    <ul class="list-unstyled post-simple-list mb-0">
-                        <?php
-                        $i = 1;
-                        foreach ($topposts as $toppost) { ?>
-                            <li class="media">
-                                <span class="reveal-title mr-25px"><?= $i++ ?></span>
-                                <div class="media-body">
-                                    <a href="blog-single-post.html" class="media-title"><?= $toppost->question ?></a>
-                                    <div class="post_meta_top">
-                                        <span class="post_meta_category">
-                                            <a href="blog-standard-two-col-right-sidebar.html">FOOD, TRAVEL</a>
-                                        </span>
-                                        <span class="post_meta_date">NOV 13, 2020</span>
-                                    </div>
-                                </div>
-                            </li>
-                        <?php } ?>
-                    </ul>
-                </div>
-                <div class="widget">
-                    <h5 class="widget-title">Instagram</h5>
-                    <ul class="row xs-gallery-gutters m-0 list-unstyled" id="instagramfeed"></ul>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- <div class="container mb-30px">
+        <?php } ?>
+        <!-- <div class="row mt-5">
+            <div class="col-md-12">
+                <center>
+                    <h1 style="font-size:32px;text-transform: uppercase;font-weight: bolder;"> đăng ký nhận thông tin từ
+                        chúng tôi </h1>
+                </center>
+                <center>
+                    <div style="width: 100px; height: 10px;background: #26ba99;border-radius: 5px;"></div>
+                </center>
                 <div class="row">
-                    <div class="col-12">
-                        <h4 class="mb-30px">Most Selling Items </h4>
-                    </div>
-                </div>
-                <div class="row products align-items-center">
-                    <div class="product col-md-6 col-lg-3">
-                        <div class="product-img-wrapper">
-                            <a href="shop-single-product.html">
-                                <img width="480" height="536" src="https://www.energeticthemes.com/templates/sada/images/products/1.jpg" alt="Product image">
-                            </a>
-                            <a rel="nofollow" href="shop-single-product.html" class="btn btn-dark rounded-0 btn-add-to-cart">Add
-                                to cart</a>
-                        </div>
-                        <div class="product-white-wrapper align-items-center">
-                            <h6 class="product-title">
-                                <a href="shop-single-product.html"> Quisque dignissim</a>
-                            </h6>
-                            <span class="price">
-                                <span class="amount">
-                                    <span class="currencySymbol">$</span>69.00</span>
-                            </span>
-                        </div>
-                    </div>
-                    <div class="product col-md-6 col-lg-3">
-                        <div class="product-img-wrapper">
-                            <a href="shop-single-product.html">
-                                <img width="480" height="536" src="https://www.energeticthemes.com/templates/sada/images/products/2.jpg" alt="Product image">
-                            </a>
-                            <a rel="nofollow" href="shop-single-product.html" class="btn btn-dark rounded-0 btn-add-to-cart">Add
-                                to cart</a>
-                        </div>
-                        <div class="product-white-wrapper align-items-center">
-                            <h6 class="product-title">
-                                <a href="shop-single-product.html"> Quisque dignissim</a>
-                            </h6>
-                            <span class="price">
-                                <span class="amount">
-                                    <span class="currencySymbol">$</span>69.00</span>
-                            </span>
-                        </div>
-                    </div>
-                    <div class="product col-md-6 col-lg-3">
-                        <div class="product-img-wrapper">
-                            <a href="shop-single-product.html">
-                                <img width="480" height="536" src="https://www.energeticthemes.com/templates/sada/images/products/3.jpg" alt="Product image">
-                            </a>
-                            <a rel="nofollow" href="shop-single-product.html" class="btn btn-dark rounded-0 btn-add-to-cart">Add
-                                to cart</a>
-                        </div>
-                        <div class="product-white-wrapper align-items-center">
-                            <h6 class="product-title">
-                                <a href="shop-single-product.html"> Quisque dignissim</a>
-                            </h6>
-                            <span class="price">
-                                <span class="amount">
-                                    <span class="currencySymbol">$</span>69.00</span>
-                            </span>
-                        </div>
-                    </div>
-                    <div class="product col-md-6 col-lg-3">
-                        <div class="product-img-wrapper">
-                            <a href="shop-single-product.html">
-                                <img width="480" height="536" src="https://www.energeticthemes.com/templates/sada/images/products/4.jpg" alt="Product image">
-                            </a>
-                            <a rel="nofollow" href="shop-single-product.html" class="btn btn-dark rounded-0 btn-add-to-cart">Add
-                                to cart</a>
-                        </div>
-                        <div class="product-white-wrapper align-items-center">
-                            <h6 class="product-title">
-                                <a href="shop-single-product.html"> Quisque dignissim</a>
-                            </h6>
-                            <span class="price">
-                                <span class="amount">
-                                    <span class="currencySymbol">$</span>69.00</span>
-                            </span>
-                        </div>
-                    </div>
-                    <div class="product col-md-6 col-lg-3">
-                        <div class="product-img-wrapper">
-                            <a href="shop-single-product.html">
-                                <img width="480" height="536" src="https://www.energeticthemes.com/templates/sada/images/products/5.jpg" alt="Product image">
-                            </a>
-                            <a rel="nofollow" href="shop-single-product.html" class="btn btn-dark rounded-0 btn-add-to-cart">Add
-                                to cart</a>
-                        </div>
-                        <div class="product-white-wrapper align-items-center">
-                            <h6 class="product-title">
-                                <a href="shop-single-product.html"> Quisque dignissim</a>
-                            </h6>
-                            <span class="price">
-                                <span class="amount">
-                                    <span class="currencySymbol">$</span>69.00</span>
-                            </span>
-                        </div>
-                    </div>
-                    <div class="product col-md-6 col-lg-3">
-                        <div class="product-img-wrapper">
-                            <a href="shop-single-product.html">
-                                <img width="480" height="536" src="https://www.energeticthemes.com/templates/sada/images/products/6.jpg" alt="Product image">
-                            </a>
-                            <a rel="nofollow" href="shop-single-product.html" class="btn btn-dark rounded-0 btn-add-to-cart">Add
-                                to cart</a>
-                        </div>
-                        <div class="product-white-wrapper align-items-center">
-                            <h6 class="product-title">
-                                <a href="shop-single-product.html"> Quisque dignissim</a>
-                            </h6>
-                            <span class="price">
-                                <span class="amount">
-                                    <span class="currencySymbol">$</span>69.00</span>
-                            </span>
-                        </div>
-                    </div>
-                    <div class="product col-md-6 col-lg-3">
-                        <div class="product-img-wrapper">
-                            <a href="shop-single-product.html">
-                                <img width="480" height="536" src="https://www.energeticthemes.com/templates/sada/images/products/12.jpg" alt="Product image">
-                            </a>
-                            <a rel="nofollow" href="shop-single-product.html" class="btn btn-dark rounded-0 btn-add-to-cart">Add
-                                to cart</a>
-                        </div>
-                        <div class="product-white-wrapper align-items-center">
-                            <h6 class="product-title">
-                                <a href="shop-single-product.html"> Quisque dignissim</a>
-                            </h6>
-                            <span class="price">
-                                <span class="amount">
-                                    <span class="currencySymbol">$</span>69.00</span>
-                            </span>
-                        </div>
-                    </div>
-                    <div class="product col-md-6 col-lg-3">
-                        <div class="product-img-wrapper">
-                            <a href="shop-single-product.html">
-                                <img width="480" height="536" src="https://www.energeticthemes.com/templates/sada/images/products/13.jpg" alt="Product image">
-                            </a>
-                            <a rel="nofollow" href="shop-single-product.html" class="btn btn-dark rounded-0 btn-add-to-cart">Add
-                                to cart</a>
-                        </div>
-                        <div class="product-white-wrapper align-items-center">
-                            <h6 class="product-title">
-                                <a href="shop-single-product.html"> Quisque dignissim</a>
-                            </h6>
-                            <span class="price">
-                                <span class="amount">
-                                    <span class="currencySymbol">$</span>69.00</span>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div> -->
-
-    <div class="container mb-30px">
-        <div class="row">
-            <div class="col-lg-6 mb-30px">
-                <div class="bg-color-gray-shade-radius px-40px py-60px">
-                    <h3>Subscribe and Stay
-                        <br>Informed
-                    </h3>
-                    <p>Oratio pertinax cu vix, id his aliquam habemus tractatos. Eu vis cursus modo officiis
-                        liberavisse,
-                        persequeris complectitur mei et. Id invidunt adipiscing cursus has.</p>
-                    <div class="form-group form-row  mb-0">
-                        <div class="input-group mb-3">
-                            <input type="email" name="email" class="form-control rounded-50 validate-required validate-email" placeholder="Your email">
-                            <div class="input-group-append">
-                                <button type="submit" class="btn rounded-50 form-custom-btn">Subscribe</button>
+                    <div class="col-md-7 mx-auto">
+                        <div class="row mt-5">
+                            <div class="col-md-8">
+                                <input type="email" name="" id="" placeholder="Email của bạn" class="w-100" style="font-size: 13px;text-indent: 10px; border: 1px solid #26ba99;background: white;border-radius: 10px;height: 40px;">
+                            </div>
+                            <div class="col-md-4">
+                                <button style="background-image: linear-gradient(-30deg, #DC2424, #4A569D);border: 0; height: 40px;color: white;text-transform: uppercase;font-size: 13px;line-height: 40px;padding: 0 20px;">đăng
+                                    ký</button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-lg-6 mb-30px">
-                <div class="bg-img-3 px-40px py-35px">
-                    <div class="white-box-square">
-                        <div class="all-text-content-white text-center py-110px">
-                            <h1>Oratio petinax cu vix</h1>
-                        </div>
-                    </div>
+        </div> -->
+    </div>
+    <div class="container footer pb-5 mt-5" style="border-top: 1px solid #26ba99;">
+        <div class="row mt-5">
+            <div class="col-md-4">
+                <h5 style="text-transform: uppercase;font-size: 15px;letter-spacing: 3px;font-weight: bolder;">hỗ trợ
+                    khách hàng</h5>
+                <div class="mt-3" style="width:100px;height:2px;background-image: linear-gradient(-30deg, #DC2424, #4A569D)"></div>
+                <h5 class="mt-2" style="text-transform: uppercase;font-size: 15px;letter-spacing: 3px;font-weight: bolder;">hotline
+                </h5>
+                <p style="font-size: 13px;">0766 667 020</p>
+                <h5 class="mt-2" style="text-transform: uppercase;font-size: 15px;letter-spacing: 3px;font-weight: bolder;">email
+                </h5>
+                <p style="font-size: 13px;">lctiendat@gmail.com</p>
+            </div>
+            <div class="col-md-4">
+                <h5 style="text-transform: uppercase;font-size: 15px;letter-spacing: 3px;font-weight: bolder;">về chúng
+                    tôi</h5>
+                <div class="mt-3 mb-3" style="width:100px;height:2px;background-image: linear-gradient(-30deg, #DC2424, #4A569D)"></div>
+                <p style="font-size: 13px;">Hỏi đáp</p>
+                <p style="font-size: 13px;">Bảo mật</p>
+
+                <p style="font-size: 13px;">Điều khoản</p>
+
+                <p style="font-size: 13px;">Blog</p>
+
+            </div>
+            <div class="col-md-4">
+                <h5 style="text-transform: uppercase;font-size: 15px;letter-spacing: 3px;font-weight: bolder;" class="mb-4">kết nối
+                </h5>
+                <i class="fab fa-facebook-square" style="color: darkblue;font-size: 40px;"></i>
+                <i class="fab fa-youtube-square ml-4" style="color: red;font-size: 40px;"></i>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="fixed-bottom float-right r-0">
+                    <p id='toTop' class="r-0 float-right"><i class="fa fa-angle-up mr-5 text-white" style="background-image: linear-gradient(-30deg, #DC2424, #4A569D);padding:10px 20px"></i></p>
                 </div>
             </div>
         </div>
     </div>
 
-    <?= $this->element('user/footer') ?>
+
+</body>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    $(document).ready(() => {
+        $(window).scroll(function() {
+            if ($(this).scrollTop()) {
+                $('#toTop').fadeIn();
+            } else {
+                $('#toTop').fadeOut();
+            }
+        });
+
+        $("#toTop").click(function() {
+            $("html, body").animate({
+                scrollTop: 0
+            }, 1000);
+        });
+    })
+</script>
+
+</html>

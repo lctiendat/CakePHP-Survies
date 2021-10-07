@@ -49,7 +49,7 @@ class ResultsTable extends Table
 
         $this->addBehavior('Timestamp');
 
-        $this->belongsTo('Surveys', [
+        $this->belongsTo('Survies', [
             'foreignKey' => 'survey_id',
             'joinType' => 'INNER',
         ]);

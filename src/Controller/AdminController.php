@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -14,6 +15,7 @@ declare(strict_types=1);
  * @since     0.2.9
  * @license   https://opensource.org/licenses/mit-license.php MIT License
  */
+
 namespace App\Controller;
 
 use Cake\Core\Configure;
@@ -31,8 +33,42 @@ use Cake\View\Exception\MissingTemplateException;
  */
 class AdminController extends AppController
 {
-    public function index(){
+    public function initialize(): void
+    {
+        parent::initialize();
+        $this->loadComponent('Auth');
+        $this->loadComponent('Home');
+    }
 
+    // thống kê admin
+    public function index()
+    {
+        $this->isAdmin();
+        $category = $this->{'Home'}->countQualityCategory();
+        $survey = $this->{'Home'}->countQualitySurvey();
+        $answer = $this->{'Home'}->countQualityAnswer();
+        $user = $this->{'Home'}->countQualityUser();
+        $this->set(compact(['category', 'survey', 'answer', 'user']));
+    }
+
+    // phân quyền admin và user
+    public function isAdmin()
+    {
+        $session = $this->request->getSession();
+        if ($session->check('role')) {
+            $email = $session->read('email');
+            $check_role = $this->{'Auth'}->queryUserByEmail($email);
+            $role = '';
+            foreach ($check_role as $item) {
+                $role = $item->role;
+            }
+            if ($role != 2) {
+                $this->Flash->error(__('Bạn không phải Quản trị viên, bạn không có quyền truy cập'));
+                return $this->redirect($this->referer());
+            }
+        } else {
+            $this->Flash->error(__('Bạn chưa đăng nhập'));
+            return $this->redirect('/Auth/login');
+        }
     }
 }
-    ?>

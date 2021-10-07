@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Model\Table;
@@ -93,11 +94,6 @@ class SurviesTable extends Table
         $validator
             ->integer('DELETE_FLG')
             ->notEmptyString('DELETE_FLG');
-
-        $validator
-            ->dateTime('time_end')
-            ->allowEmptyDateTime('time_end');
-
         return $validator;
     }
 
@@ -110,8 +106,8 @@ class SurviesTable extends Table
      */
     public function buildRules(RulesChecker $rules): RulesChecker
     {
-        $rules->add($rules->existsIn(['category_id'], 'Categories'), ['errorField' => 'category_id']);
-        $rules->add($rules->existsIn(['user_id'], 'Users'), ['errorField' => 'user_id']);
+        // $rules->add($rules->existsIn(['category_id'], 'Categories'), ['errorField' => 'category_id']);
+        // $rules->add($rules->existsIn(['user_id'], 'Users'), ['errorField' => 'user_id']);
 
         return $rules;
     }

@@ -58,10 +58,6 @@ class CreateSurvies extends AbstractMigration
             'default' => null,
             'null' => false,
         ]);
-        $table->addColumn('time_end', 'datetime', [
-            'default' => null,
-            'null' => true,
-        ]);
         $table->create();
     }
 }

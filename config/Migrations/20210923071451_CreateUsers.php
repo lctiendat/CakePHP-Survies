@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 use Migrations\AbstractMigration;
@@ -52,6 +53,11 @@ class CreateUsers extends AbstractMigration
         ]);
         $table->addColumn('role', 'integer', [
             'default' => 1,
+            'limit' => 1,
+            'null' => false,
+        ]);
+        $table->addColumn('DELETE_FLG', 'integer', [
+            'default' => 0,
             'limit' => 1,
             'null' => false,
         ]);

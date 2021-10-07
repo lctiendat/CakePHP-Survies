@@ -58,18 +58,27 @@ $routes->scope('/', function (RouteBuilder $builder) {
     /*
      * ...and connect the rest of 'Pages' controller's URLs.
      */
+    // Admin Manager Category
     $builder->connect('/admin/categories', 'Categories::index');
     $builder->connect('/admin/categories/add', 'Categories::add');
-    $builder->connect('/admin/categories/view', 'Categories::view');
+    $builder->connect('/admin/categories/edit/:id', 'Categories::edit', ['pass' => ['id']]);
 
-    $builder->connect('/pages/*', 'Pages::display');
+    // Admin Manager Answer
+    $builder->connect('/admin/answers', 'Answers::index');
+    $builder->connect('/admin/answers/add', 'Answers::add');
+    $builder->connect('/admin/answers/edit/:id', 'Answers::edit', ['pass' => ['id']]);
+    // Admin Mannager User
     $builder->connect('/admin/users', 'Users::index');
     $builder->connect('/admin/users/edit/:id', 'Users::edit', ['pass' => ['id']]);
 
-
+    // Admin Manager Survey
     $builder->connect('/admin/survies', 'Survies::index');
     $builder->connect('/admin/survies/add', 'Survies::add');
-
+    $builder->connect('/admin/survies/edit/:id', 'Survies::edit', ['pass' => ['id']]);
+    // Admin Manager Thống kê
+    $builder->connect('/admin/statistical/category/:id', 'Statisticals::category', ['pass' => ['id']]);
+    $builder->connect('/admin/statistical/survey/:id', 'Statisticals::survey', ['pass' => ['id']]);
+    //index admin
     $builder->connect('/admin', 'Admin::index');
 
     //Auth
@@ -77,11 +86,12 @@ $routes->scope('/', function (RouteBuilder $builder) {
     $builder->connect('/Auth/login', 'Auths::login');
     $builder->connect('/Auth/logout', 'Auths::logout');
     $builder->connect('/Auth/change', 'Auths::changeinfor');
+    $builder->connect('/Auth/changepass', 'Auths::changepassword');
     $builder->connect('/Auth/forget', 'Auths::forget');
     $builder->connect('/Auth/renew', 'Auths::renewPassword');
     $builder->connect('/Auth/testmail', 'Auths::testmail');
 
-    //
+    //Home
 
     $builder->connect('/', 'Homes::index');
     $builder->connect('/category/:id', ['controller' => 'Homes', 'action' => 'getSurviesByCategory'], ['pass' => ['id']]);
@@ -90,6 +100,9 @@ $routes->scope('/', function (RouteBuilder $builder) {
     $builder->connect('/result/saveNoLogin/:id_survey', 'Homes::getResultDontLogin', ['pass' => ['id_survey']]);
     $builder->connect('/img/avatar/*', 'Users::changeinfor');
 
+    //Page error
+    $builder->connect('/404page', 'Homes::page404');
+    //
     /*
      * Connect catchall routes for all controllers.
      *
