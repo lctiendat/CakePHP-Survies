@@ -14,7 +14,7 @@ if (!isset($_SESSION)) {
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>SB Admin 2 - Blank</title>
+    <title>Dashboard Admin</title>
 
     <!-- Custom fonts for this template-->
     <link href="/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -36,7 +36,7 @@ if (!isset($_SESSION)) {
         .prev,
         .next {
             background: #4e73df;
-           padding: 5px;
+            padding: 5px;
             border-radius: 5px;
             margin-right: 10px;
             text-decoration: none;
@@ -65,7 +65,6 @@ if (!isset($_SESSION)) {
         input:focus {
             outline: none;
         }
-       
     </style>
 </head>
 

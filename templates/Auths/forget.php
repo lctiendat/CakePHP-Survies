@@ -16,7 +16,7 @@ if (!isset($_SESSION)) {
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>SB Admin 2 - Login</title>
+    <title>Forget Password</title>
 
     <!-- Custom fonts for this template-->
     <link href="/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -44,9 +44,8 @@ if (!isset($_SESSION)) {
                             <div class="col-lg-6">
                                 <div class="p-5">
                                     <div class="text-center">
-                                        <h1 class="h4 text-gray-900 mb-2">Forgot Your Password?</h1>
-                                        <p class="mb-4">We get it, stuff happens. Just enter your email address below
-                                            and we'll send you a link to reset your password!</p>
+                                        <h1 class="h4 text-gray-900 mb-4">Forgot Your Password?</h1>
+                                    
                                     </div>
                                     <?= $this->Flash->render() ?>
                                     <form class="user" action="" method="POST">
