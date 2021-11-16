@@ -25,8 +25,8 @@ class ResultsSeed extends AbstractSeed
     //             'survey_id' => rand(1, 10),
     //             'answer_id' => rand(1, 10),
     //             'user_id' => rand(1, 10),
-    //             'created'=>  date('Y-m-d h:m:s'),
-    //             'modified'=>  date('Y-m-d h:m:s'),
+    //             'created'=>  date('Y-m-d H:i:s'),
+    //             'modified'=>  date('Y-m-d H:i:s'),
     //         ];
     //         $table = $this->table('results');
     //         $table->insert($data)->save();

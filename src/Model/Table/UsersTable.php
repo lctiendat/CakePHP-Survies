@@ -70,15 +70,41 @@ class UsersTable extends Table
             ->allowEmptyString('id', null, 'create');
 
         $validator
-            ->email('email')
-            ->requirePresence('email', 'create', 'Email đã tồn tại trong hệ thống')
-            ->notEmptyString('email', 'Email không được để trống');
+            ->notEmptyString('email', errorEmail)
+            ->add('email', 'validFormat', [
+                'rule' => array('custom', '/^[a-z0-9.]+@[a-z0-9]+\.[a-z]{2,}$/'),
+                'message' => EMAIL_INVALIDATE
+            ])
+            ->add(
+                'email',
+                [
+                    'unique' => [
+                        'rule' => 'validateUnique',
+                        'provider' => 'table',
+                        'message' => EMAIL_ALREADY_EXISTS
+                    ]
+                ]
+            );
 
         $validator
-            ->maxLength('phone', 10, 'Số điện thoại không được quá 10 số')
-            ->minLength('phone', 9, 'Số điện thoại ít nhất là 9 số')
+            ->add('phone', 'validFormat', [
+                'rule' => array('custom', '/^(((0))[0-9]{9})$/'),
+                'message' => PHONE_NUMBER_IS_NOT_IN_THE_CORRECT_FORMAT
+            ])
+            ->maxLength('phone', 10)
+            ->minLength('phone', 9)
             ->requirePresence('phone', 'create')
-            ->notEmptyString('phone', 'Số điện thoại không được để trống');
+            ->notEmptyString('phone', errorPhone)
+            ->add(
+                'phone',
+                [
+                    'unique' => [
+                        'rule' => 'validateUnique',
+                        'provider' => 'table',
+                        'message' => THE_PHONE_NUMBER_ALREADY_EXISTS_IN_THE_SYSTEM
+                    ]
+                ]
+            );
 
         $validator
             ->scalar('avatar')
@@ -86,10 +112,14 @@ class UsersTable extends Table
             ->notEmptyString('avatar');
 
         $validator
+            ->add('password', 'validFormat', [
+                'rule' => array('custom', '/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/'),
+                'message' => THE_PASSWORD_IS_NOT_STRONG_ENOUGH
+            ])
             ->scalar('password')
             ->maxLength('password', 50)
             ->requirePresence('password', 'create')
-            ->notEmptyString('password', 'Mật khẩu không được để trống');
+            ->notEmptyString('password', errorPassword);
 
         $validator
             ->scalar('address')
@@ -119,8 +149,6 @@ class UsersTable extends Table
      */
     public function buildRules(RulesChecker $rules): RulesChecker
     {
-        $rules->add($rules->isUnique(['email']), ['errorField' => 'email']);
-        $rules->add($rules->isUnique(['phone']), ['errorField' => 'phone'], ['message' => 'Số điện thoại đã tồn tại trong hệ thống.']);
         return $rules;
     }
 }

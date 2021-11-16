@@ -57,6 +57,9 @@ class SurviesTable extends Table
             'foreignKey' => 'user_id',
             'joinType' => 'INNER',
         ]);
+        $this->hasMany('Results', [
+            'foreignKey' => 'survey_id',
+        ]);
     }
 
     /**
@@ -72,6 +75,16 @@ class SurviesTable extends Table
             ->allowEmptyString('id', null, 'create');
 
         $validator
+            // ->add(
+            //     'question',
+            //     [
+            //         'unique' => [
+            //             'rule' => 'validateUnique',
+            //             'provider' => 'table',
+            //             'message' => VALUE_ALREADY_EXITS
+            //         ]
+            //     ]
+            // )
             ->scalar('question')
             ->maxLength('question', 255)
             ->requirePresence('question', 'create')
@@ -83,6 +96,9 @@ class SurviesTable extends Table
             ->requirePresence('description', 'create')
             ->notEmptyString('description');
 
+        $validator
+            ->integer('category_id')
+            ->notEmptyString('category_id');
         $validator
             ->integer('status')
             ->notEmptyString('status');

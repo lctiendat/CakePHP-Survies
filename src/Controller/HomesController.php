@@ -4,234 +4,367 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use Cake\ORM\TableRegistry;
+use Cake\Http\Exception\NotFoundException;
 
-/**
- * Homes Controller
- *
- * @method \App\Model\Entity\Home[]|\Cake\Datasource\ResultSetInterface paginate($object = null, array $settings = [])
- */
 class HomesController extends AppController
 {
     /**
      * Index method
-     *
-     * @return \Cake\Http\Response|null|void Renders view
      */
-    public function initialize(): void
-    {
-        parent::initialize();
-        $this->loadComponent('Home');
-        $this->loadComponent('Auth');
-        $this->loadComponent('Survey');
-    }
     public function index()
     {
-        $survies = $this->paginate($this->{'Home'}->getSurviesHaveInAnswer(), ['limit' => '6']);
-        $categories = $this->{'Home'}->getAllCategory();
-        $countSurveyInCategory = $this->{'Home'}->countSurveyInCategory();
-        if ($this->request->is('POST')) {
-            $key = $this->request->getData('key');
-            if ($key == '') {
-                $this->set(compact(['result', 'categories', 'countSurveyInCategory']));
-            } else {
-                $result = $this->{'Home'}->search($key, 'Survies', 'question');
-                if ($result == []) {
-                    $this->Flash->error(__('Dữ liệu bạn tìm kiếm không có sẵn'));
+        try {
+            $session = $this->request->getSession();
+            $session->delete('oldPage');
+            $categories = $this->paginate($this->{'Home'}->getCategoryHaveSurvey(), ['limit' => PAGE_COUNT_CLIENT]);
+            $countCategory = count($this->{'Home'}->getCategoryHaveSurvey()->toArray());
+            if ($session->check('arrUserSession')) {
+                $arrUserSession = $session->read('arrUserSession');
+                $user_id = $arrUserSession['user_id'];
+                $categories = $this->paginate($this->{'Home'}->getSortCategoryHaveSurvey($user_id), ['limit' => PAGE_COUNT_CLIENT]);
+                $this->set(compact(['categories', 'countCategory', 'user_check']));
+            }
+            if ($this->request->is(['GET'])) {
+                $key = $this->request->getQuery('key');
+                $session->write('valueSearch', $key);
+                if ($key == '') {
+                    $this->set(compact(['categories', 'countCategory']));
                 } else {
-                    $this->set(compact(['result', 'categories', 'countSurveyInCategory']));
-                }
-            }
-        }
-        $this->set(compact(['survies', 'categories', 'countSurveyInCategory']));
-    }
-
-    // lấy survy dựa theo category
-    public function getSurviesByCategory($id)
-    {
-        $survies  = $this->paginate($this->{'Home'}->getSurviesHaveInAnswerByCategoryId($id), ['limit' => 6]);
-        $categories = $this->{'Home'}->getAllCategory();
-        $getCategoryForId = $this->{'Home'}->getCategoryById($id);
-        $countSurveyInCategory = $this->{'Home'}->countSurveyInCategory();
-        if (count($getCategoryForId) > 0 || gettype($id) == 'string') {
-            $this->set(compact(['survies', 'categories', 'getCategoryForId', 'countSurveyInCategory']));
-        } else {
-            return $this->redirect('/404page');
-        }
-    }
-
-    // hiển thị câu hỏi
-    public function showQuestion($id_category, $id_question)
-    {
-        $session = $this->request->getSession();
-        $survies = $this->{'Home'}->getSurveyById($id_question);
-        if (count($survies)) {
-            $answers = $this->{'Home'}->getAnswerBySurveyId($id_question);
-            if ($session->check('user_id')) {
-                $user_id = $session->read('user_id');
-                $getAnswerUser = $this->{'Home'}->getAnswerByUser($user_id, $id_question);
-                $this->set(compact(['survies', 'answers', 'getAnswerUser']));
-            }
-            $this->set(compact(['survies', 'answers']));
-        } else {
-            return $this->redirect('/404page');
-        }
-    }
-
-    // xử lí phần lấy dữ liệu người dùng trả lời đã login
-    public function getDataSubmit($id_survey)
-    {
-        $session = $this->request->getSession();
-        if ($this->request->is('post')) {
-            $type_select = '';
-            $check_survey = $this->{'Survey'}->getSurveyById($id_survey);
-            $data = [];
-            $user_id = $session->read('user_id');
-            $answer_id =  $this->request->getData('answer_id');
-            foreach ($check_survey as $item) {
-                $type_select = $item->type_select;
-            }
-            if ($type_select == 2) {
-                foreach ($answer_id as $answerID) {
-                    array_push($data, [
-                        'survey_id' => $id_survey,
-                        'answer_id' => $answerID,
-                        'user_id' => $user_id,
-                        'created' => date('Y-m-d H:m:s'),
-                        'modified' => date('Y-m-d H:m:s')
-                    ]);
-                }
-                $check_result = $this->{'Home'}->getResultBySurveyIdAndUserId($id_survey, $user_id);
-                if ($answer_id  == '') {
-                    $this->Flash->error(__('Vui lòng chọn câu trả lời'));
-                    return $this->redirect($this->referer());
-                } else {
-                    if (count($check_result) > 0) {
-                        foreach ($answer_id as $item) {
-                            $check_result1 = $this->{'Home'}->checkResult($user_id, $id_survey, $item);
-                            if (count($check_result1) == 0) {
-                                $this->{'Home'}->updateMoreAnswer($id_survey, $item, $user_id);
-                            }
+                    $result = $this->{'Home'}->searchHome(trim($key))->toArray();
+                    if ($result == []) {
+                        $this->set(compact(['result']));
+                        $session->write('searchError', DATA_NOT_FOUND);
+                    } else {
+                        if ($session->check('arrUserSession')) {
+                            $arrUserSession = $session->read('arrUserSession');
+                            $user_id = $arrUserSession['user_id'];
+                            $countResult = count($result);
+                            $result = $this->paginate($this->{'Home'}->getSortAndSearchCategoryHaveSurvey($user_id, trim($key)), ['limit' => PAGE_COUNT_CLIENT]);
+                            $this->set(compact(['result', 'countResult']));
+                        } else {
+                            $countResult = count($result);
+                            $result = $this->paginate($this->{'Home'}->searchHome(trim($key)), ['limit' => PAGE_COUNT_CLIENT]);
+                            $this->set(compact(['result', 'countResult']));
                         }
-                        $this->{'Home'}->deleteResultNoChoose($answer_id, $id_survey, $user_id);
-                        $this->Flash->success(__('Cập nhật câu trả lời thành công'));
-                        return $this->redirect('/');
-                    } else {
-                        $this->{'Home'}->saveAnswer($data, 2);
-                        $this->Flash->success(__('Chọn trả lời thành công'));
-                        return $this->redirect('/');
                     }
                 }
-            } else {
-                $check_result = $this->{'Home'}->getResultBySurveyIdAndUserId($id_survey, $user_id);
-                if ($answer_id  == '') {
-                    $this->Flash->error(__('Vui lòng chọn câu trả lời'));
-                    return $this->redirect($this->referer());
-                } else {
-                    if (count($check_result) > 0) {
-                        $data = [
-                            'survey_id' => $id_survey, 'answer_id' => $answer_id[0], 'user_id' => $user_id,
-                            'modified' => date('Y-m-d H:m:s')
-                        ];
-                        $this->{'Home'}->updateAnswer($data);
-                        $this->Flash->success(__('Cập nhật câu trả lời thành công'));
-                        return $this->redirect('/');
-                    } else {
-                        $data = [
-                            'survey_id' => $id_survey, 'answer_id' => $answer_id[0], 'user_id' => $user_id, 'created' => date('Y-m-d H:m:s'),
-                            'modified' => date('Y-m-d H:m:s')
-                        ];
-                        $this->{'Home'}->saveAnswer($data, 1);
-                        $this->Flash->success(__('Cám ơn bạn đã bình chọn'));
-                        return $this->redirect('/');
-                    }
-                }
+            }
+            $this->set(compact(['categories', 'countCategory']));
+        } catch (NotFoundException $e) {
+            $attribute = $this->request->getAttribute('paging');
+            $requestedPage = $attribute['Categories']['requestedPage'];
+            $pageCount = $attribute['Categories']['pageCount'];
+            if ($requestedPage > $pageCount) {
+                return $this->redirect("/?page=" . $pageCount . "");
             }
         }
     }
 
-    // xử lí phần lấy dữ liệu chưa login
-    public function getResultDontLogin($id_survey)
+    /**
+     * Get data from user not logged in method
+     */
+    public function showSurveyByCategory($id)
     {
         $session = $this->request->getSession();
-        if ($this->request->is('post')) {
-            $answer_id =  $this->request->getData('answer_id');
-            $email =  $this->request->getData('email');
-            $phone =  $this->request->getData('phone');
-            $password =  $this->request->getData('password');
-            $errorpass = '';
-            if ($answer_id == '') {
-                $this->Flash->error(__('Vui lòng chọn câu trả lời'));
+        $issetCategory = $this->{'Home'}->checkCategoryHaveSurvey($id);
+        if (count($issetCategory) > 0) {
+            $survies = $this->{'Home'}->getSurviesHaveAnswerByCategory($id);
+            $category = $this->{'Category'}->getCategoryById($id);
+            $nameCategory = '';
+            $idCategory = $id;
+            foreach ($category as $key => $value) {
+                $nameCategory = $value->name;
+            }
+            if ($session->check('arrUserSession')) {
+                $arrUserSession = $session->read('arrUserSession');
+                $user_id = $arrUserSession['user_id'];
+                $check_result  =  $this->{'Home'}->checkResult($user_id, $id);
+                $getAnswerUser = $this->{'Home'}->getAnswerByUser($user_id);
+                $this->set(compact(['survies', 'answers', 'getAnswerUser', 'check_result']));
+            }
+            $this->set(compact(['survies', 'nameCategory', 'idCategory']));
+        } else {
+            return $this->redirect(URL_404_PAGE);
+        }
+    }
+
+    /**
+     * Show answer by survey
+     */
+    public function getAnswerBySurvey($id)
+    {
+        $answer = $this->{'Home'}->getAnswerBySurvey($id);
+        return $answer;
+    }
+
+    /**
+     * Get data from user not logged in method
+     */
+    public function saveVotedLogin($id)
+    {
+        $session = $this->request->getSession();
+        if ($this->request->is('POST')) {
+            $question = $this->request->getData('question');
+            $answer = $this->request->getData('answer');
+            $type_select = $this->request->getData('type_select');
+            $arrUserSession = $session->read('arrUserSession');
+            $user_id = $arrUserSession['user_id'];
+            $arrOldAnswer = [];
+            $check_result  =  $this->{'Home'}->checkResult($user_id, $id);
+            $prePage = trim($this->request->getData('prePage'));
+            if ($session->check('oldPage') == false) {
+                $session->write('oldPage', $prePage);
+            }
+            if ($answer == null) {
+                $this->Flash->error(__(ANSWER_NOT_EMPTY));
+                return $this->redirect($this->referer());
+            } else if (count($question) > count($answer)) {
+                foreach ($answer as $value) {
+                    foreach ($value as $item) {
+                        array_push($arrOldAnswer, $item);
+                    }
+                }
+                $session->write('arrOldAnswer', $arrOldAnswer);
+                $this->Flash->error(__(PLEASE_SELECT_ALL_ANSWERS));
                 return $this->redirect($this->referer());
             } else {
-                $data = ['email' => $email, 'phone' => $phone, 'password' => $password, 'avatar' => 'default-avatar.png', 'token' => $this->getToken(), 'status' => 2, 'created' => date('Y-m-d H:m:s'), 'modified' => date('Y-m-d H:m:s')];
-                $result = $this->{'Auth'}->handelRegister($data);
-                if ($result['status'] == true) {
-                    $queryEmail = $this->{'Auth'}->queryUserByEmail($email);
-                    foreach ($queryEmail as $user) {
-                        $session->write('email', $user->email);
-                        $session->write('role', $user->role);
-                        $session->write('user_id', $user->id);
+                if (count($check_result) > 0) {
+                    $arrDataSame = [];
+                    $arrData = [];
+                    foreach ($question as $key => $value) {
+                        array_push($arrData, [
+                            'question' => $question[$key],
+                            'answer' => $answer[$key],
+                            'type_select' => $type_select[$key]
+                        ]);
                     }
-                    $user_id = $session->read('user_id');
-                    $check_survey = $this->{'Survey'}->getSurveyById($id_survey);
-                    $data = [];
-                    foreach ($check_survey as $item) {
-                        $type_select = $item->type_select;
+                    foreach ($question as $key => $value) {
+                        array_push($arrDataSame, [
+                            'question' => $question[$key],
+                            'answer' => $answer[$key],
+                        ]);
                     }
-                    if ($type_select == 1) {
-                        foreach ($answer_id as $answerID) {
-                            array_push($data, [
-                                'survey_id' => $id_survey,
-                                'answer_id' => $answerID,
-                                'user_id' => $user_id,
-                                'created' => date('Y-m-d H:m:s'),
-                                'modified' => date('Y-m-d H:m:s')
-                            ]);
+                    $answerCheck = $this->{'Home'}->getVotedByUser($id, $user_id);
+                    $arrResult = [];
+                    foreach ($answerCheck as $item) {
+                        array_push(
+                            $arrResult,
+                            $item['answer_id']
+                        );
+                    }
+                    $arrDataSameCheck = [];
+                    foreach ($arrDataSame as $item) {
+                        foreach ($item['answer'] as $item1) {
+                            array_push(
+                                $arrDataSameCheck,
+                                $item1
+                            );
                         }
-                        $this->{'Home'}->saveAnswer($data, 1);
-                        $this->Flash->success(__('Cám ơn bạn đã bình chọn'));
-                        return $this->redirect('/');
+                    }
+                    if ($arrResult == $arrDataSameCheck) {
+                        $this->Flash->warning(__('Phần này em chưa xử lí ... '));
+                        return $this->redirect($this->referer());
                     } else {
-                        $data = [
-                            'survey_id' => $id_survey, 'answer_id' => $answer_id[0], 'user_id' => $user_id, 'created' => date('Y-m-d H:m:s'),
-                            'modified' => date('Y-m-d H:m:s')
-                        ];
-                        $this->{'Home'}->saveAnswer($data, 2);
-                        $this->Flash->success(__('Cám ơn bạn đã bình chọn'));
-                        return $this->redirect('/');
+                        $arrTypeSelectOnly = [];
+                        $arrTypeSelectMuti = [];
+                        foreach ($arrData as $item) {
+                            if ($item['type_select'] == 1) {
+                                array_push($arrTypeSelectOnly, $item);
+                            } else {
+                                array_push($arrTypeSelectMuti, $item);
+                            }
+                        }
+                        foreach ($arrTypeSelectOnly as $item) {
+                            $data = [
+                                'category_id' => $id,
+                                'survey_id' => $item['question'],
+                                'answer_id' => $item['answer'][0],
+                                'user_id' => $user_id,
+                                'modified' => date('Y-m-d H:i:s')
+                            ];
+                            $this->{'Home'}->updateVoted($data);
+                        }
+                        $arrAnswer = [];
+                        foreach ($arrTypeSelectMuti as $item) {
+                            foreach ($item['answer'] as $item1) {
+                                array_push($arrAnswer, $item1);
+                                $data = [
+                                    'category_id' => $id,
+                                    'survey_id' => $item['question'],
+                                    'answer_id' => $item1,
+                                    'user_id' => $user_id,
+                                ];
+                                $result = $this->{'Home'}->checkVoted($data);
+                                if (count($result) == 0) {
+                                    $data = [
+                                        'category_id' => $id,
+                                        'survey_id' => $item['question'],
+                                        'answer_id' => $item1,
+                                        'user_id' => $user_id,
+                                        'created' => date('Y-m-d H:i:s'),
+                                        'modified' => date('Y-m-d H:i:s')
+                                    ];
+                                    $this->{'Home'}->insertVoted($data);
+                                }
+                                $data = [
+                                    'category_id' => $id,
+                                    'survey_id' => $item['question'],
+                                    'answer_id' => $arrAnswer,
+                                    'user_id' => $user_id,
+                                ];
+                                $this->{'Home'}->deleteVoted($data);
+                            }
+                        }
+                        $this->Flash->success(__(UPDATED_ANSWER_SUCCESSFULLY));
+                        return $this->redirect(URL_INDEX);
                     }
                 } else {
+                    $arrData = [];
+                    foreach ($question as $key => $value) {
+                        array_push($arrData, [
+                            'question' => $question[$key],
+                            'answer' => $answer[$key]
+                        ]);
+                    }
+                    $data = [];
+                    foreach ($arrData as $value) {
+                        foreach ($value['answer'] as $value1) {
+                            array_push(
+                                $data,
+                                [
+                                    'category_id' => $id,
+                                    'survey_id' => $value['question'],
+                                    'answer_id' => $value1,
+                                    'user_id' => $user_id,
+                                    'created' => date('Y-m-d H:i:s'),
+                                    'modified' => date('Y-m-d H:i:s')
+                                ]
+                            );
+                        }
+                    }
+                    $this->{'Home'}->saveVoted($data);
+                    $session->delete('arrOldAnswer');
+                    $this->Flash->success(__(THANKS_YOU_FOR_VOTING));
+                    return $this->redirect(URL_INDEX);
+                }
+            }
+        }
+    }
+
+    /**
+     * Get data from user not login
+     */
+    public function saveVotedNotLogin($id)
+    {
+        $session = $this->request->getSession();
+        if ($this->request->is('POST')) {
+            $question = $this->request->getData('question');
+            $answer = $this->request->getData('answer');
+            $email = $this->request->getData('email');
+            $phone = $this->request->getData('phone');
+            $password = $this->request->getData('password');
+            $arrOldAnswer = [];
+            if ($answer == null) {
+                $arrOldValueSession = [
+                    'OldValueEmail' => $email,
+                    'OldValuePhone' => $phone,
+                    'OldValuePassword' => $password,
+                ];
+                $session->write('arrOldValueSession', $arrOldValueSession);
+                $this->Flash->error(__(ANSWER_NOT_EMPTY));
+                return $this->redirect($this->referer());
+            } else if (count($question) > count($answer)) {
+                $arrOldValueSession = [
+                    'OldValueEmail' => $email,
+                    'OldValuePhone' => $phone,
+                    'OldValuePassword' => $password,
+                ];
+                $session->write('arrOldValueSession', $arrOldValueSession);
+                foreach ($answer as $value) {
+                    foreach ($value as $item) {
+                        array_push($arrOldAnswer, $item);
+                    }
+                }
+                $session->write('arrOldAnswer', $arrOldAnswer);
+                $this->Flash->error(__(PLEASE_SELECT_ALL_ANSWERS));
+                return $this->redirect($this->referer());
+            } else {
+                $data = [
+                    'email' => $email,
+                    'phone' => $phone,
+                    'password' => $password,
+                    'avatar' => 'default-avatar.png',
+                    'token' => $this->{'Auth'}->getToken(),
+                    'status' => 0,
+                    'created' => date('Y-m-d H:i:s'),
+                    'modified' => date('Y-m-d H:i:s')
+                ];
+                $result = $this->{'Auth'}->register($data);
+                if ($result['status'] ==  true) {
+                    $queryEmail = $this->{'Auth'}->queryUserByEmail($email);
+                    $arrUserSession = [];
+                    foreach ($queryEmail as $user) {
+                        $arrUserSession = [
+                            'email' => $user->email,
+                            'role' => $user->role,
+                            'user_id' => $user->id,
+                        ];
+                    }
+                    $session->write('arrUserSession', $arrUserSession);
+                    $arrUserSession = $session->read('arrUserSession');
+                    $user_id = $arrUserSession['user_id'];
+                    $arrData = [];
+                    foreach ($question as $key => $value) {
+                        array_push($arrData, [
+                            'question' => $question[$key],
+                            'answer' => $answer[$key]
+                        ]);
+                    }
+                    $data = [];
+                    foreach ($arrData as $value) {
+                        foreach ($value['answer'] as $value1) {
+                            array_push(
+                                $data,
+                                [
+                                    'category_id' => $id,
+                                    'survey_id' => $value['question'],
+                                    'answer_id' => $value1,
+                                    'user_id' => $user_id,
+                                    'created' => date('Y-m-d H:i:s'),
+                                    'modified' => date('Y-m-d H:i:s')
+                                ]
+                            );
+                        }
+                    }
+                    $this->{'Home'}->saveVoted($data);
+                    $session->delete('arrOldAnswer');
+                    $this->Flash->success(__(THANKS_YOU_FOR_VOTING));
+                    return $this->redirect(URL_INDEX);
+                } else {
+                    $arrOldValueSession = [
+                        'OldValueEmail' => $email,
+                        'OldValuePhone' => $phone,
+                        'OldValuePassword' => $password,
+                    ];
+                    $session->write('arrOldValueSession', $arrOldValueSession);
+                    foreach ($answer as $value) {
+                        foreach ($value as $item) {
+                            array_push($arrOldAnswer, $item);
+                        }
+                    }
+                    $session->write('arrOldAnswer', $arrOldAnswer);
                     if (isset($result['data']['email'])) {
                         $session->write('errorEmail', reset($result['data']['email']));
                     }
                     if (isset($result['data']['phone'])) {
                         $session->write('errorPhone',  reset($result['data']['phone']));
                     }
-                    if ($password == '') {
-                        $session->write('errorPassword', 'Mật khẩu không được để trống');
+                    if (isset($result['data']['password'])) {
+                        $session->write('errorPassword',  reset($result['data']['password']));
                     }
                     return $this->redirect($this->referer());
                 }
             }
         }
-    }
-
-    // để tạo template 404 không bị lỗi
-    public function page404()
-    {
-    }
-
-    // get token
-    public function getToken()
-    {
-        $length = 10;
-        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        $charactersLength = strlen($characters);
-        $getToken = '';
-        for ($i = 0; $i < $length; $i++) {
-            $getToken .= $characters[rand(0, $charactersLength - 1)];
-        }
-        return $getToken;
     }
 }

@@ -10,12 +10,10 @@ if (!isset($params['escape']) || $params['escape'] !== false) {
 }
 ?>
 <!-- <div style="color: green;" class="message success text-center" onclick="this.classList.add('hidden')"></div> -->
-<div class="row">
-    <div class="col-md-12 mx-auto">
-        <div class="alert alert-success alert-dismissible">
-            <button type="button" class="close" data-dismiss="alert" onclick="this.classList.add('hidden')">&times;</button>
-            <strong>Thành công ! </strong> <?= $message ?>
-        </div>
+<div class="col-md-12 mx-auto">
+    <div class="alert alert-success alert-dismissible" id="alert">
+        <button type="button" class="close" data-dismiss="alert" onclick="this.classList.add('hidden')">&times;</button>
+         <?= $message ?>
     </div>
 </div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>

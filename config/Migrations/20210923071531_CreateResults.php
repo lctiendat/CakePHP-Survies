@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 use Migrations\AbstractMigration;
@@ -15,7 +16,7 @@ class CreateResults extends AbstractMigration
     public function change()
     {
         $table = $this->table('results');
-        $table->addColumn('survey_id', 'integer', [
+        $table->addColumn('category_id', 'integer', [
             'default' => null,
             'limit' => 11,
             'null' => false,

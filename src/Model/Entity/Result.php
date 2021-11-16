@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Model\Entity;
@@ -32,6 +33,7 @@ class Result extends Entity
      * @var array
      */
     protected $_accessible = [
+        'category_id' => true,
         'survey_id' => true,
         'answer_id' => true,
         'user_id' => true,

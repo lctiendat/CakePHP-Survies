@@ -4,76 +4,61 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use Cake\Http\Session;
-use Cake\ORM\Query;
-use Cake\ORM\TableRegistry;
-use Cake\Routing\Route\RedirectRoute;
-use Cake\Mailer\Mailer;
-use Cake\Validation\Validator;
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
-use Cake\View\Helper\FormHelper;
-use Seld\PharUtils\Timestamps;
+use App\Controller\AppController;
+use Cake\Mailer\Email;
 
-require ROOT . '/vendor/phpmailer/phpmailer/src/Exception.php';
-require ROOT . '/vendor/phpmailer/phpmailer/src/PHPMailer.php';
-require ROOT . '/vendor/phpmailer/phpmailer/src/SMTP.php';
-/**
- * Auths Controller
- *  @property \App\Model\Table\UsersTable $Users
- * @method \App\Model\Entity\Auth[]|\Cake\Datasource\ResultSetInterface paginate($object = null, array $settings = [])
- */
-class AuthsController extends AppController
+class authsController extends AppController
 {
     /**
-     * Index method
-     *
-     * @return \Cake\Http\Response|null|void Renders view
+     * Register method
      */
-    public function initialize(): void
-    {
-        parent::initialize();
-        $this->loadComponent('Auth');
-    }
-    // đăng ký thành viên
     public function register()
     {
         $session = $this->request->getSession();
         if ($this->request->is('post')) {
             $errors = '';
-            $email =  $this->request->getData('email');
-            $phone =  $this->request->getData('phone');
-            $password = $this->request->getData('password');
-            $data = ['email' => $email, 'phone' => $phone, 'password' => $password, 'avatar' => 'default-avatar.png', 'token' => $this->getToken(), 'status' => 2, 'created' => date('Y-m-d H:m:s'), 'modified' => date('Y-m-d H:m:s')];
-            $result = $this->{'Auth'}->handelRegister($data);
+            $email =  trim($this->request->getData('email'));
+            $phone =  trim($this->request->getData('phone'));
+            $password = trim($this->request->getData('password'));
+            $data = ['email' => $email, 'phone' => $phone, 'password' => $password, 'avatar' => 'default-avatar.png', 'token' => $this->{'Auth'}->getToken(), 'status' => 2, 'created' => date('Y-m-d H:i:s'), 'modified' => date('Y-m-d H:i:s')];
+            $result = $this->{'Auth'}->register($data);
             if ($result['status'] == true) {
                 $queryEmail = $this->{'Auth'}->queryUserByEmail($email);
+                $arrUserSession = [];
                 foreach ($queryEmail as $user) {
-                    $session->write('email', $user->email);
-                    $session->write('role', $user->role);
-                    $session->write('user_id', $user->id);
+                    $arrUserSession = [
+                        'email' => $user->email,
+                        'role' => $user->role,
+                        'user_id' => $user->id,
+                    ];
                 }
-                return $this->redirect('/');
+                $session->write('arrUserSession', $arrUserSession);
+                return $this->redirect(URL_INDEX);
             } else {
-                if ($password == '') {
-                    $session->write('errorPassword', 'Mật khẩu không được để trống');
-                }
+                $arrOldValueSession = [
+                    'OldValueEmail' => $email,
+                    'OldValuePhone' => $phone,
+                ];
+                $session->write('arrOldValueSession', $arrOldValueSession);
                 $errors = $result['data'];
-                $this->set(compact('errors'));
+                $this->set(compact(['errors']));
             }
         }
     }
-    // đăng nhập
+
+    /**
+     * Login method
+     */
     public function login()
     {
         $session = $this->request->getSession();
-        if ($session->check('user_id')) {
-            return $this->redirect('/');
+        if ($session->check('arrUserSession')) {
+            return $this->redirect(URL_INDEX);
         } else {
             if ($this->request->is('post')) {
                 $email =  $this->request->getData('email');
                 $password =  $this->request->getData('password');
-                $result = $this->{'Auth'}->handelLogin($email, $password);
+                $result = $this->{'Auth'}->login($email, $password);
                 if ($result['status'] == true) {
                     $statusUser = '';
                     $queryEmail = $this->{'Auth'}->queryUserByEmail($email);
@@ -82,176 +67,303 @@ class AuthsController extends AppController
                     }
                     if ($statusUser == 1) {
                         $this->Flash->error(__('Tài khoản ' . $email . ' đang bị tạm khóa.Vui lòng liên hệ Quản trị viên'));
+                        $arrOldValueSession = [
+                            'OldValueEmail' => $email,
+                        ];
+                        $session->write('arrOldValueSession', $arrOldValueSession);
                         return  $this->redirect('');
                     } else {
+                        $session->delete('OldValue');
+                        $arrUserSession = [];
                         foreach ($queryEmail as $user) {
-                            $session->write('email', $user->email);
-                            $session->write('role', $user->role);
-                            $session->write('user_id', $user->id);
+                            $arrUserSession = [
+                                'email' => $user->email,
+                                'role' => $user->role,
+                                'user_id' => $user->id,
+                            ];
                         }
-                        $this->redirect('/');
+                        $session->write('arrUserSession', $arrUserSession);
+                        $arrUserSession = $session->read('arrUserSession');
+                        $arrOldValueSession = [];
+                        $session->write('arrOldValueSession', $arrOldValueSession);
+                        if ($arrUserSession['role'] == 9) {
+                            $this->redirect(URL_ADMIN);
+                        }
+                        $this->redirect(URL_INDEX);
                     }
                 } else {
+                    $arrOldValueSession = [
+                        'OldValueEmail' => $email,
+                    ];
+                    $session->write('arrOldValueSession', $arrOldValueSession);
                     $this->Flash->error(__($result['message']));
                     return  $this->redirect('');
                 }
             }
         }
     }
-    //đăng xuất
+
+    /**
+     * Logout method
+     */
     public function logout()
     {
         $session = $this->request->getSession();
         $session->destroy();
-        return $this->redirect('/Auth/login');
+        return $this->redirect(URL_INDEX);
     }
-    //thay đổi thông tin
+
+    /**
+     * Change infor method
+     */
     public function changeinfor()
     {
         $session = $this->request->getSession();
-        if ($session->check('user_id')) {
-            $user_id = $session->read('user_id');
+        if ($session->check('arrUserSession')) {
+            $arrUserSession = $session->read('arrUserSession');
+            $user_id = $arrUserSession['user_id'];
             $get_user = $this->{'Auth'}->queryUserById($user_id);
+            $arrayRequest = [];
+            $arrayUser = [];
+            $arrayValueRequest = [];
+            foreach ($get_user as $item) {
+                array_push($arrayUser, $item->phone);
+                array_push($arrayUser, $item->address);
+                array_push($arrayUser, $item->avatar);
+            }
             if ($this->request->is('post')) {
-                $phone = $this->request->getData('phone');
-                $address = $this->request->getData('address');
-                if ($phone == '') {
-                    $this->Flash->error(__('Số điện thoại không được để trống'));
-                } else {
-                    $avatar = $this->request->getData('avatar');
-                    if (isset($user_id)) {
-
-                        if ($avatar->getClientFilename() != '') {
+                $avatar = $this->request->getData('avatar');
+                $prePage = trim($this->request->getData('prePage'));
+                if ($session->check('oldPage') == false) {
+                    $session->write('oldPage', $prePage);
+                }
+                $oldPage = $session->read('oldPage');
+                $allRequest = h($this->request->getData());
+                if (count(array_diff($arrayUser, $arrayValueRequest))  == 0) {
+                    $this->Flash->warning(__(YOU_HAVENT_CHANGED_ANYTHING));
+                    return $this->redirect($this->referer());
+                }
+                $phone = h(trim($this->request->getData('phone')));
+                $address = h(trim($this->request->getData('address')));
+                if (isset($user_id)) {
+                    if ($avatar->getClientFilename() != '') {
+                        foreach ($allRequest as $key => $item) {
+                            array_push($arrayRequest, $key);
+                            array_push($arrayValueRequest, h(trim($item)));
+                        }
+                        array_push($arrayValueRequest, $name = $avatar->getClientFilename());
+                        unset($arrayValueRequest[0]);
+                        unset($arrayValueRequest[3]);
+                        $get_timestamp_avartar = substr($arrayUser[2], -10);
+                        $arrayUser[2] = str_replace($get_timestamp_avartar, '', $arrayUser[2]);
+                        $arrayValueRequest[2] = h($arrayValueRequest[2]);
+                        if (count(array_diff($arrayUser, $arrayValueRequest))  == 0) {
+                            $this->Flash->warning(__(YOU_HAVENT_CHANGED_ANYTHING));
+                            return $this->redirect($this->referer());
+                        } else {
                             $name = $avatar->getClientFilename() . date_timestamp_get(date_create());
                             $targetPath = WWW_ROOT . 'img/avatar' . DS . $name;
                             $avatar->moveTo($targetPath);
-                            $this->{'Auth'}->handelChangeInfor($phone, $address, $user_id, $name);
-                        } else {
-                            $name = '';
-                            $this->{'Auth'}->handelChangeInfor($phone, $address, $user_id, $name);
+                            $result = $this->{'Auth'}->changeinfor($phone, h($address), $user_id, $name);
+                            if ($result['status'] == true) {
+                                $this->Flash->success(__($result['message']));
+                                return $this->redirect($this->referer());
+                            } else {
+                                $arrOldValueSession = [
+                                    'OldValueAddress' => $address,
+                                    'OldValuePhone' => $phone,
+                                ];
+                                $session->write('arrOldValueSession', $arrOldValueSession);
+                                $this->Flash->error(__($result['message']));
+                                return $this->redirect('');
+                            }
                         }
-                        $this->Flash->success(__('Thay đổi thông tin thành công'));
-                        return $this->redirect('');
+                    } else {
+                        foreach ($allRequest as $key => $item) {
+                            array_push($arrayRequest, $key);
+                            array_push($arrayValueRequest, h(trim($item)));
+                        }
+                        unset($arrayValueRequest[0]);
+                        unset($arrayValueRequest[3]);
+                        $name = '';
+                        unset($arrayUser[2]);
+                        $arrayValueRequest['2'] = h($arrayValueRequest['2']);
+                        if (count(array_diff($arrayUser, $arrayValueRequest))  == 0) {
+                            $this->Flash->warning(__(YOU_HAVENT_CHANGED_ANYTHING));
+                            return $this->redirect($this->referer());
+                        } else {
+                            $result = $this->{'Auth'}->changeinfor($phone, h($address), $user_id, h($name));
+                            if ($result['status'] == true) {
+                                $this->Flash->success(__($result['message']));
+                                return $this->redirect($this->referer());
+                            } else {
+                                $arrOldValueSession = [
+                                    'OldValueAddress' => h($address),
+                                    'OldValuePhone' => h($phone),
+                                ];
+                                $session->write('arrOldValueSession', $arrOldValueSession);
+                                $this->Flash->error(__($result['message']));
+                                return $this->redirect('');
+                            }
+                        }
                     }
                 }
             }
             $this->set(compact(['get_user']));
         } else {
-            return $this->redirect('/Auth/login');
+            return $this->redirect(URL_AUTH_LOGIN);
         }
     }
-    // thay đổi mật khẩu của người dùng
-    public function changepassword()
+
+    /**
+     * Change password method
+     */
+    public function changepass()
     {
         $session = $this->request->getSession();
-        if ($session->check('user_id')) {
-            $user_id = $session->read('user_id');
+        if ($session->check('arrUserSession')) {
+            $arrUserSession = $session->read('arrUserSession');
+            $user_id = $arrUserSession['user_id'];
             if ($this->request->is('post')) {
                 $old_password = $this->request->getData('old_password');
                 $new_password = $this->request->getData('new_password');
-                $re_password = $this->request->getData('re_password');
-                if ($old_password == '' || $new_password == '' || $re_password =  '') {
-                    $this->Flash->error(__('Dữ liệu điền vào không được để trống'));
+                $renew_password = $this->request->getData('renew_password');
+                if ($old_password == '' || $new_password == '' || $renew_password == '') {
+                    $arrOldValueSession = [
+                        'OldValueOldPassword' => $old_password,
+                        'OldValueNewPassword' => $new_password,
+                        'OldValueReNewPassword' => $renew_password,
+                    ];
+                    $session->write('arrOldValueSession', $arrOldValueSession);
+                    $this->Flash->error(__(INPUT_DATA_CANNOT_BE_LEFT_BLANK));
                 } elseif ($old_password == $new_password) {
-                    $this->Flash->error(__('Mật khẩu cũ và mật khẩu mới không được giống nhau'));
-                }  else {
+                    $arrOldValueSession = [
+                        'OldValueOldPassword' => $old_password,
+                        'OldValueNewPassword' => $new_password,
+                        'OldValueReNewPassword' => $renew_password,
+                    ];
+                    $session->write('arrOldValueSession', $arrOldValueSession);
+                    $this->Flash->error(__(OLD_PASSWORD_AND_NEW_PASSWORD_MUST_NOT_BE_THE_SAME));
+                } elseif ($new_password != $renew_password) {
+                    $this->Flash->error(__(RE_ENTERED_PASSWORD_IS_NOT_THE_SAME));
+                    $arrOldValueSession = [
+                        'OldValueOldPassword' => $old_password,
+                        'OldValueNewPassword' => $new_password,
+                        'OldValueReNewPassword' => $renew_password,
+                    ];
+                    $session->write('arrOldValueSession', $arrOldValueSession);
+                } elseif (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/', $new_password)) {
+                    $arrOldValueSession = [
+                        'OldValueOldPassword' => $old_password,
+                        'OldValueNewPassword' => $new_password,
+                        'OldValueReNewPassword' => $renew_password,
+                    ];
+                    $session->write('arrOldValueSession', $arrOldValueSession);
+                    $this->Flash->error(__(PASSWORD_IS_NOT_STRONG_ENOUGH));
+                } else {
                     if (isset($user_id)) {
                         $old_password = md5($this->request->getData('old_password'));
                         $new_password = md5($this->request->getData('new_password'));
                         $check_user = $this->{'Auth'}->queryOldPassword($user_id, $old_password);
                         if (count($check_user) > 0) {
-                            $this->{'Auth'}->handelChangePassword($new_password, $user_id);
-                            $this->Flash->success(__('Thay đổi mật khẩu thành công'));
+                            $this->{'Auth'}->changePassword($new_password, $user_id);
+                            $this->Flash->success(__(CHANGE_PASSWORD_SUCCESSFULLY));
+                            $arrOldValueSession = [];
+                            $session->write('arrOldValueSession', $arrOldValueSession);
+                            $this->redirect(URL_INDEX);
                         } else {
-                            $this->Flash->error(__('Mật khẩu cũ không đúng'));
+                            $old_password = $this->request->getData('old_password');
+                            $new_password = $this->request->getData('new_password');
+                            $renew_password = $this->request->getData('renew_password');
+                            $arrOldValueSession = [
+                                'OldValueOldPassword' => $old_password,
+                                'OldValueNewPassword' => $new_password,
+                                'OldValueReNewPassword' => $renew_password,
+                            ];
+                            $session->write('arrOldValueSession', $arrOldValueSession);
+                            $this->Flash->error(__(OLD_PASSWORD_IS_INCORRECT));
                         }
                     }
                 }
             }
-            $this->set(compact(['get_user']));
         } else {
-            return $this->redirect('/Auth/login');
+            return $this->redirect(URL_AUTH_LOGIN);
         }
     }
-    // quên mật khẩu của người dùng
+
+    /**
+     * Forget password method
+     */
     public function forget()
     {
+        $session = $this->request->getSession();
         if ($this->request->is('post')) {
             $email = $this->request->getData('email');
             $checkEmail = $this->{'Auth'}->queryUserByEmail($email);
             if (count($checkEmail) > 0) {
-                $new_password = $this->getToken();
+                $new_password = $this->{'Auth'}->getToken();
                 $subject = 'Đặt lại mật khẩu mới';
                 $message = '
-                Xin chào ' . $email . '
-                Chúng tôi đã nhận được yêu cầu đặt mật khẩu mới cho tài khoản này:
-                Mật khẩu mới của bạn là : <strong>' . $new_password . '</strong>
-                Vui lòng nhấn vào <a href="https://lctiendat.vn/Auth/login"><button style="border:none;padding:5px 20px 5px 20px;border-radius: 20px;background:blue;color:white;font-weight:bold;text-transform:uppercase;font-family:Calibri">Verify</button></a> để tiến hành đăng nhập và đổi lại mật khẩu
+                Hi ' . $email . '
+                We have received a request to set a new password for this account :
+                    Your new password is: <strong>' . $new_password . '</strong>
+                    Please click <a href="' . URL_DOMAIN_NAME . '"><button style="border:none;padding:5px 20px 5px 20px;border-radius: 20px;background:blue;color:white;font-weight:bold;text-transform:uppercase;font-family:Calibri">Verify</button></a> to proceed to login and change password.
                 ';
-                $this->sendMail($email, $subject, $message);
-                $this->Flash->success(__('Vui lòng vào email ' . $email . ' và làm theo hướng dẫn'));
+                $this->{'Home'}->sendMail($email, $subject, $message);
+                $this->Flash->success(__('Please go to email ' . $email . ' and follow the instructions'));
                 $new_password = md5($new_password);
-                $this->{'Auth'}->handelUpdatePasswordByEmail($email, $new_password);
+                $this->{'Auth'}->updatePasswordByEmail($email, $new_password);
+                $arrOldValueSession = [];
+                $session->write('arrOldValueSession', $arrOldValueSession);
+            } else if ($email == '') {
+                $this->Flash->error(__(errorEmail));
+            } else if (!preg_match('/^[a-z0-9.]+@[a-z0-9]+\.[a-z]{2,}$/', $email)) {
+                $this->Flash->error(__(EMAIL_INVALIDATE));
+                $arrOldValueSession = [
+                    'OldValueEmail' => $email
+                ];
+                $session->write('arrOldValueSession', $arrOldValueSession);
             } else {
-                $this->Flash->error(__('Email không tồn tại trong hệ thống'));
+                $arrOldValueSession = [
+                    'OldValueEmail' => $email
+                ];
+                $session->write('arrOldValueSession', $arrOldValueSession);
+                $this->Flash->error(__(EMAIL_DOES_NOT_EXIST_IN_THE_SYSTEM));
             }
         }
     }
-    // lấy ngẫu nhiên chuỗi token
-    public function getToken()
-    {
-        $length = 10;
-        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        $charactersLength = strlen($characters);
-        $getToken = '';
-        for ($i = 0; $i < $length; $i++) {
-            $getToken .= $characters[rand(0, $charactersLength - 1)];
-        }
-        return $getToken;
-    }
 
-    // module PHPMailer
-    public function sendMail($to, $subject, $message)
+    /**
+     * History voted method
+     */
+    public function history()
     {
-        date_default_timezone_set('Asia/Ho_Chi_Minh');
-        $sender = "lctiendat@gmail.com";
-        $header = "X-Mailer: PHP/" . phpversion() . "Return-Path: $sender";
-        $mail = new PHPMailer();
-        $mail->SMTPDebug  = 2;
-        $mail->IsSMTP();
-        $mail->Host = "smtp.gmail.com";
-        $mail->SMTPAuth = true;
-        $mail->Username   = "lctiendat@gmail.com";
-        $mail->Password   = "Tiendat11082000";
-        $mail->SMTPSecure = "ssl";
-        $mail->Port = 465;
-        $mail->SMTPOptions = array(
-            'tls' => array(
-                'verify_peer' => false,
-                'verify_peer_name' => false,
-                'allow_self_signed' => true
-            ),
-            'ssl' => array(
-                'verify_peer' => false,
-                'verify_peer_name' => false,
-                'allow_self_signed' => true
-            )
-        );
-        $mail->CharSet = 'UTF-8';
-        $mail->From = $sender;
-        $mail->FromName = "From Hệ Thống Khảo Sát";
-        $mail->AddAddress($to);
-        $mail->IsHTML(true);
-        $mail->CreateHeader($header);
-        $mail->Subject = $subject;
-        $mail->Body    = nl2br($message);
-        $mail->AltBody = nl2br($message);
-        $mail->SMTPDebug = false;
-        $mail->do_debug = 0;
-        if (!$mail->Send()) {
-            return true;
+        $session = $this->request->getSession();
+        if ($session->check('arrUserSession')) {
+            $arrUserSession = $session->read('arrUserSession');
+            $user_id = $arrUserSession['user_id'];
+            $categories = $this->paginate($this->{'Auth'}->historyVoted($user_id), ['limit' => PAGE_COUNT_CLIENT]);
+            $countCategoryChoose = count($this->{'Auth'}->historyVoted($user_id)->toArray());
+            $this->set(compact(['categories', 'countCategoryChoose']));
+            if ($this->request->is(['GET'])) {
+                $key = $this->request->getQuery('key');
+                $session->write('valueSearch', $key);
+                if ($key == '') {
+                    $this->set(compact(['survies']));
+                } else {
+                    $result = $this->{'Home'}->searchHistorySurveyUserChoose($user_id, $key)->toArray();
+                    if ($result == []) {
+                        $this->set(compact(['result']));
+                        $session->write('searchError', DATA_NOT_FOUND);
+                    } else {
+                        $countResult = count($result);
+                        $result = $this->paginate($this->{'Home'}->searchHistorySurveyUserChoose($user_id, $key), ['limit' => PAGE_COUNT_CLIENT]);
+                        $this->set(compact(['result', 'countResult']));
+                    }
+                }
+            }
         } else {
-            return false;
+            return $this->redirect(URL_AUTH_LOGIN);
         }
     }
 }

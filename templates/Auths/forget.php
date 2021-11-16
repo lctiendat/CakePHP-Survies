@@ -1,89 +1,51 @@
-<?php
-$this->disableAutoLayout();
-if (!isset($_SESSION)) {
-    session_start();
-}
-
-?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-
+    <?= $this->element('user/headerAuth') ?>
     <title>Forget Password</title>
-
-    <!-- Custom fonts for this template-->
-    <link href="/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
-    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
-    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- Custom styles for this template-->
-    <link href="/css/admin/sb-admin-2.min.css" rel="stylesheet">
-
 </head>
 
 <body class="bg-gradient-primary">
-
-    <div class="container">
-
-        <!-- Outer Row -->
-        <div class="row justify-content-center">
-
-            <div class="col-xl-10 col-lg-12 col-md-9">
-
-                <div class="card o-hidden border-0 shadow-lg my-5">
-                    <div class="card-body p-0">
-                        <!-- Nested Row within Card Body -->
-                        <div class="row">
-                            <div class="col-lg-6 d-none d-lg-block bg-password-image"></div>
-                            <div class="col-lg-6">
-                                <div class="p-5">
-                                    <div class="text-center">
-                                        <h1 class="h4 text-gray-900 mb-4">Forgot Your Password?</h1>
-                                    
+    <div class="container-fluid" style="margin-top: 100px;">
+        <div class="row p-5">
+            <div class="col-md-8 mx-auto">
+                <div class="card p-5" style="background:#F8F8FF;border-radius: 30px;border: 0;">
+                    <div class="row banner">
+                        <div class="col-md-6">
+                            <h1 class="mt-5"> BACK <span style="color: #26ba99;">LOG IN</span> </h1>
+                            <a href="/auths/login"><button>LOG IN</button></a>
+                        </div>
+                        <div class="col-md-6" style="border-left:  1px solid gray;">
+                        <a href="/" style="background: #212529;border:0" class="btn btn-primary float-left mt-3 ml-3">On the homepage <i class="fa fa-long-arrow-alt-left"></i></a>
+                            <div class="p-5 mt-3">
+                                <?= $this->Flash->render() ?>
+                                <div class="text-center">
+                                    <h3 class=" text-gray-900 mb-4">Reset Password!</h3>
+                                </div>
+                                <form class="user" action="" method="POST">
+                                    <div class="form-group">
+                                        <input type="email " name="email" class="form-control form-control-user" id="exampleInputEmail" aria-describedby="emailHelp" placeholder="Enter Email Address..." require value="<?php if (isset($_SESSION['arrOldValueSession']['OldValueEmail'])) { ?><?= $_SESSION['arrOldValueSession']['OldValueEmail'] ?>
+<?php  }
+                                                                                                                                                                                                                            unset($_SESSION['arrOldValueSession']['OldValueEmail']) ?>">
                                     </div>
-                                    <?= $this->Flash->render() ?>
-                                    <form class="user" action="" method="POST">
-                                        <div class="form-group">
-                                            <input type="email " required aria-required="" name="email" class="form-control form-control-user" id="exampleInputEmail" aria-describedby="emailHelp" placeholder="Enter Email Address..." require>
-                                        </div>
-                                        <button type="submit" class="btn btn-primary btn-user btn-block">
-                                            Reset Password
-                                        </button>
-                                    </form>
-                                    <hr>
-                                    <div class="text-center">
-                                        <a class="small" href="register">Create an Account!</a>
-                                    </div>
-                                    <div class="text-center">
-                                        <a class="small" href="login">Already have an account? Login!</a>
-                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-user btn-block" style="margin-top: 0;">
+                                        Reset Password
+                                    </button>
+                                </form>
+                                <div class="text-center">
+                                    <a class="small" href="/auths/register">Create an Account!</a>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
             </div>
-
         </div>
 
     </div>
-
-    <!-- Bootstrap core JavaScript-->
-    <script src="/vendor/jquery/jquery.min.js"></script>
-    <script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Core plugin JavaScript-->
-    <script src="/vendor/jquery-easing/jquery.easing.min.js"></script>
-
-    <!-- Custom scripts for all pages-->
-    <script src="/js/admin/sb-admin-2.min.js"></script>
+    </div>
 </body>
+<?= $this->element('user/scriptBootstrap') ?>
 
 </html>

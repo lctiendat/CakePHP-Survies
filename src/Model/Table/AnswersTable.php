@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Model\Table;
@@ -74,7 +75,9 @@ class AnswersTable extends Table
             ->maxLength('name', 255)
             ->requirePresence('name', 'create')
             ->notEmptyString('name');
-        
+        $validator
+            ->integer('survey_id')
+            ->notEmptyString('survey_id');
         $validator
             ->integer('DELETE_FLG')
             ->notEmptyString('DELETE_FLG');

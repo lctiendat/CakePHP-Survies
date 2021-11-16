@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Model\Table;
@@ -65,11 +66,20 @@ class CategoriesTable extends Table
             ->allowEmptyString('id', null, 'create');
 
         $validator
+            // ->add(
+            //     'name',
+            //     [
+            //         'unique' => [
+            //             'rule' => 'validateUnique',
+            //             'provider' => 'table',
+            //             'message' => VALUE_ALREADY_EXITS
+            //         ]
+            //     ]
+            // )
             ->scalar('name')
             ->maxLength('name', 255)
             ->requirePresence('name', 'create')
             ->notEmptyString('name');
-
         return $validator;
     }
 }

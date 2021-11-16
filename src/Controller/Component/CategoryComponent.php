@@ -5,24 +5,39 @@ declare(strict_types=1);
 namespace App\Controller\Component;
 
 use App\Controller\Component\CommonComponent;
-use Cake\ORM\TableRegistry;
 
 
 class CategoryComponent extends CommonComponent
 {
+    /**
+     * Initialize method
+     */
     public function initialize(array $config): void
     {
-        $this->loadModel(['Survies', 'Answers', 'Categories', 'Results', 'Users']);
+        $this->loadModel([
+            'Survies',
+            'Answers',
+            'Categories',
+            'Results',
+            'Users'
+        ]);
     }
 
-    // lấy tất cả category
+    /**
+     * Handle get all category method
+     */
     public function getAllCategory()
     {
-        return $this->Categories->find()->order(['id' => 'desc'])->where(['DELETE_FLG' => 0]);
+        $query = $this->Categories->find()
+            ->where(['DELETE_FLG' => 0])
+            ->order(['id' => 'desc']);
+        return $query;
     }
 
-    // xử lí phần thêm category
-    public function handelAddCategory($data)
+    /**
+     * Handle add category method
+     */
+    public function addCategory($data)
     {
         $category = $this->Categories->newEntity($data);
         $result = $this->Categories->save($category);
@@ -35,12 +50,13 @@ class CategoryComponent extends CommonComponent
         return [
             'result' => 'success',
             'data' =>  $result,
-            'message' => 'Thêm Category thành công'
         ];
     }
 
-    // xử lí phần chỉnh sửa category
-    public function handelEditCategory($id, $data)
+    /**
+     * Handle edit category method
+     */
+    public function editCategory($id, $data)
     {
 
         $category = $this->Categories->get($id);
@@ -58,34 +74,70 @@ class CategoryComponent extends CommonComponent
         ];
     }
 
-    //xử lí phần xóa category
-    public function handelDeleteCategory($id)
-    {
-        $query_category = $this->Categories->query();
-        $query_category->delete()->where(['id' => $id])->execute();
-        return $query_category ? true : false;
-    }
-
-    // lấy category dựa theo id
+    /**
+     * Handle get category by id method
+     */
     public function getCategoryById($id)
     {
-        return $this->Categories->find()->where(['id' => $id])->all();
+        $query = $this->Categories->find()
+            ->where([
+                'id' => $id,
+                'DELETE_FLG' => 0
+            ])
+            ->all();
+        return $query;
     }
 
-    // lấy các category mà có survey
+    /**
+     * Handle get category have survey method
+     */
     public function getIssetCategory($id)
     {
-        return $this->Users->find()->where([$id . ' IN' => $this->Survies->find()->select('category_id')])->all();
+        $query = $this->Users->find()
+            ->where([
+                $id . ' IN' => $this->Survies->find()
+                    ->select('category_id')
+                    ->where(['DELETE_FLG' => 0])
+            ])
+            ->all();
+        return $query;
     }
 
-    // xóa mềm category
-    public function deleteSoftCategory($id)
+    /**
+     * Handle delete soft category method
+     */
+    public function deleteCategory($id)
     {
         $query = $this->Categories->query();
-        $query->update()->set(['DELETE_FLG' => 1])->where(['id' => $id])->execute();
+        $query->update()
+            ->set(['DELETE_FLG' => 1])
+            ->where(['id' => $id])
+            ->execute();
         return [
             'status' => true,
-            'message' => 'Xóa Category thành công'
         ];
+    }
+
+    /**
+     * Handle save more answer
+     */
+    public function saveMoreSurvey($data)
+    {
+    }
+
+    /**
+     * Handle get late id category
+     */
+    public function getLatestIdCategory()
+    {
+        $query = $this->Categories->find()
+            ->order(['id' => 'desc'])
+            ->limit(1)
+            ->all();
+        $id = '';
+        foreach ($query as $item) {
+            $id = $item->id;
+        }
+        return $id;
     }
 }

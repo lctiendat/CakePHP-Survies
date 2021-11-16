@@ -5,17 +5,27 @@ declare(strict_types=1);
 namespace App\Controller\Component;
 
 use App\Controller\Component\CommonComponent;
-use Cake\ORM\TableRegistry;
 
 
 class SurveyComponent extends CommonComponent
 {
+    /**
+     * Initialize method
+     */
     public function initialize(array $config): void
     {
-        $this->loadModel(['Survies', 'Answers', 'Categories', 'Results', 'Users']);
+        $this->loadModel([
+            'Survies',
+            'Answers',
+            'Categories',
+            'Results',
+            'Users'
+        ]);
     }
 
-    // xử lí phần thêm survey
+    /**
+     * Handle add survey method
+     */
     public function handelAddSurvey($data)
     {
         $survey = $this->Survies->newEntity($data);
@@ -30,20 +40,37 @@ class SurveyComponent extends CommonComponent
         return [
             'result' => 'success',
             'data' =>  $result,
-            'message' => 'Thêm Survey thành công'
         ];
     }
 
-    // lấy survey dựa theo id
+    /**
+     * Handle get survey by id method
+     */
     public function getSurveyById($id)
     {
-        return $this->Survies->find()->select(['Survies.id', 'question', 'description', 'category_id', 'type_select', 'created', 'modified'])->where(['Survies.id' => $id])->all();
+        $query = $this->Survies->find()
+            ->select([
+                'Survies.id',
+                'question',
+                'description',
+                'category_id',
+                'type_select',
+                'created',
+                'modified'
+            ])
+            ->where([
+                'Survies.id' => $id,
+                'DELETE_FLG' => 0
+            ])
+            ->all();
+        return $query;
     }
 
-    // xử lí phần chỉnh sửa survey
-    public function handelEditSurvey($id, $data)
+    /**
+     * Handle edit survey method
+     */
+    public function editSurvey($id, $data)
     {
-
         $survey = $this->Survies->get($id);
         $survey = $this->Survies->patchEntity($survey, $data);
         $result = $this->Survies->save($survey);
@@ -55,43 +82,87 @@ class SurveyComponent extends CommonComponent
         }
         return [
             'status' => true,
-            'message' => 'Chỉnh sửa Suurvey thành công'
         ];
     }
 
-    // xử lí phần xóa survey
-    public function handelDeleteSurvey($id)
-    {
-        $query_survey = $this->Survies->query();
-        $query_survey->delete()->where(['id' => $id])->execute();
-        return $query_survey ? true : false;
-    }
-
-    // lấy tất cả survey
+    /**
+     * Handle get all survey method
+     */
     public function getAllSurvey()
     {
-        return $this->Survies->find()->where(['DELETE_FLG' => 0])->all();
+        $query = $this->Survies->find()
+            ->where(['DELETE_FLG' => 0])
+            ->all();
+        return $query;
     }
 
-    // lấy tất cả survey cùng với category
+    /**
+     * Handle get all survey by category method
+     */
     public function getAllSurveyWithCategory()
     {
-        return $this->Survies->find()->select(['category' => 'Categories.name', 'question', 'created', 'Survies.id', 'status'])
-            ->innerJoinWith('Categories')
+        $query = $this->Survies->find()
+            ->select([
+                'category' => 'Categories.name',
+                'question',
+                'created',
+                'Survies.id',
+                'status',
+                'count' => 'Results.survey_id'
+            ])
+            ->join([
+                'table' => 'categories',
+                'alias' => 'Categories',
+                'type' => 'left',
+                'conditions' =>
+                ['Categories.id = Survies.category_id']
+            ])
+            ->join([
+                'table' => 'results',
+                'alias' => 'Results',
+                'type' => 'left',
+                'conditions' =>
+                ['Survies.id = Results.survey_id']
+            ])
             ->where(['Survies.DELETE_FLG' => 0])
-            ->order(['Survies.id' => 'desc']);
+            ->order(['Survies.id' => 'desc'])
+            ->group('Survies.id');
+        return $query;
     }
 
-    // xử lí phần xóa mềm survey
-    public function deleteSoftSurvey($id)
+    /**
+     * Handle delete soft survey method
+     */
+    public function deleteSurvey($id)
     {
         $query_survey = $this->Survies->query();
-        $query_survey->update()->set(['DELETE_FLG' => 1])->where(['id' => $id])->execute();
+        $query_survey->update()
+            ->set(['DELETE_FLG' => 1])
+            ->where(['id' => $id])
+            ->execute();
         $query_answer = $this->Answers->query();
-        $query_answer->update()->set(['DELETE_FLG' => 1])->where(['survey_id' => $id])->execute();
+        $query_answer->update()
+            ->set(['DELETE_FLG' => 1])
+            ->where(['survey_id' => $id])
+            ->execute();
         return [
             'status' => true,
-            'message' => 'Xóa Survey thành công'
         ];
+    }
+
+    /**
+     * Handle get late id survey
+     */
+    public function getLatestIdSurvey()
+    {
+        $query = $this->Survies->find()
+            ->order(['id' => 'desc'])
+            ->limit(1)
+            ->all();
+        $id = '';
+        foreach ($query as $item) {
+            $id = $item->id;
+        }
+        return $id;
     }
 }

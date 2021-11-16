@@ -1,145 +1,149 @@
 <?= $this->element('user/header') ?>
-
-    <div class="container-fluid" style="margin-top: 100px;">
-        <div class="row p-5">
-            <div class="col-md-12">
-                <?= $this->Flash->render() ?>
-                <div class="card p-5" style="background:#F8F8FF;border-radius: 30px;border: 0;">
-                    <div class="row banner">
-                        <div class="col-md-6">
-                            <h1> NỀN TẢNG <span style="color: #26ba99;">KHẢO SÁT</span> </h1>
-                            <p>Ngiên cứu thị trường</p>
-                           
-                            <a href="#survey"><button>Tham gia khảo sát</button></a>
-                        </div>
-                        <div class="col-md-6 text-center">
-                            <img src="https://khaosat.me/assets/images/landing_page_top_image.webp?v=2021-10-02-04-05" width="70%" alt="">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+<div class="container" id="survey">
+    <div class="row">
+        <?= $this->Flash->render() ?>
+        <div class="col-md-12">
+            <center>
+                <h1> WHAT WE SURVEY
+                </h1>
+            </center>
+            <center>
+                <div></div>
+            </center>
         </div>
     </div>
-    <div class="container" id="survey">
-        <div class="row">
-            <div class="col-md-12">
-                <center>
-                    <h1 style="font-size:32px;text-transform: uppercase;font-weight: bolder;"> chúng tôi khảo sát những
-                        gì </h1>
-                </center>
-                <center>
-                    <div style="width: 100px; height: 10px;background: #26ba99;border-radius: 5px;"></div>
-                </center>
-            </div>
+    <div class="row mt-3">
+        <div class="col-md-12 text-right">
+            <form action="#survey">
+                <input type="text" name="key" style="border: 1px solid #ccc;height:40px" value="<?php if (isset($_SESSION['valueSearch'])) { ?><?= trim($_SESSION['valueSearch'])  ?><?php }
+                                                                                                                                                                                    unset($_SESSION['valueSearch']) ?>">
+                <button type="submit" class="btn btn-primary" style="background: #212529;height: 40px !important;
+    border-radius: 0 !important;margin-top:-5px">Search</button>
+            </form>
         </div>
-        <div class="row mt-5">
+    </div>
+    <div class="row mt-4">
+        <?php if (isset($_SESSION['searchError'])) { ?>
+            <div class="col-md-9 mx-auto">
+                <div class="alert alert-danger alert-dismissible fade show">
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    <?= $_SESSION['searchError']; ?>
 
-            <?php foreach ($countSurveyInCategory as $category) { ?>
-                <a href="/category/<?= $category->CategoryId ?>"><button type="button" class="btn btn-primary ml-3 bg-white text-dark" style="border: 1px solid black; border-radius:5px;padding: 5px 20px">
-                        <?= $category->CategoryName ?> <span class="badge badge-dark text-white"><?= $category->count ?></span>
-                    </button></a>
-            <?php } ?>
-        </div>
-        <div class="row mt-3">
-            <div class="col-md-12 text-right">
-                <form action="#survey" method="post">
-                    <input type="text" name="key" style="border: 1px solid #ccc;height:40px">
-                    <button type="submit" class="btn btn-primary" style="background-image: linear-gradient(-30deg, #DC2424, #4A569D)">Search</button>
-                </form>
+                </div>
             </div>
-        </div>
-        <div class="row mt-2" >
-            <?php
-            if (isset($result)) {
-                if (count($result) > 0) {
-                    $i = 1;
-                    foreach ($result as $item) { ?>
-                        <div class="col-md-4 mt-3">
-                            <div class="card p-4" style="border-radius: 30px ;border: 0;box-shadow: 5px 5px 50px rgb(0 0 0 / 10%);">
-                                <span style="color: #424242;border-left: 5px solid #26ba99;border-spacing: 15px;
-                   "> <span class="ml-2" style="font-size: 14px;"><?= $item->category ?></span></span>
-                                <a href="/category/<?= $item->category_id ?>/question/<?= $item->id ?>" class="text-decoration-none">
-                                    <h6 class="pt-3 pb-4 mt-2" style="font-weight: bolder;color:black;"><?= $item->question ?></h6>
-                                </a>
+            <div class="col-md-9 mx-auto">
+                <button type="submit" class="btn text-white float-left back backtoPrePage" style="background: #212529;border-radius:0">Back <i class="fa fa-undo-alt"></i></button>
+            </div>
+        <?php }
+        unset($_SESSION['searchError']) ?>
+        <?php
+        if (isset($result)) {
+            if (count($result) > 0) {
+                foreach ($result as $item) { ?>
+                    <div class="col-md-9 mx-auto mt-3">
+                        <div class="card p-3" style="border: 0;box-shadow: 5px 5px 50px rgb(0 0 0 / 10%);border-left: 5px solid #26ba99;">
+                            <div class="row">
+                                <div class="col-10">
+                                    <a href="/<?= $item->id ?>/question" class="text-decoration-none">
+                                        <h6 class="pt-2 pb-2 mt-2 text-dark"><?= $item->name ?> </h6>
+                                    </a>
+                                </div>
+                                <div class="col-md-2">
+                                    <?php if ($item->user_check != null) { ?>
+                                        <i class="fa fa-check-circle mt-3" style="color: blue;font-size:25px"></i>
+                                    <?php } ?>
+                                </div>
                             </div>
-                        </div>
-                <?php }
-                }
-            } else { ?>
-                <?php foreach ($survies as $survy) {
-                ?>
-                    <div class="col-md-4 mt-3">
-                        <div class="card p-4" style="border-radius: 30px ;border: 0;box-shadow: 5px 5px 50px rgb(0 0 0 / 10%);">
-                            <span style="color: #424242;border-left: 5px solid #26ba99;border-spacing: 15px;
-                   "> <span class="ml-2" style="font-size: 14px;"><?= $survy->category ?></span></span>
-                            <a href="/category/<?= $survy->category_id ?>/question/<?= $survy->id ?>" class="text-decoration-none">
-                                <h6 class="pt-3 pb-4 mt-2" style="font-weight: bolder;color:black;"><?= $survy->question ?></h6>
-                            </a>
                         </div>
                     </div>
             <?php }
-            } ?>
-
-        </div>
-            <div class="row mb-5">
-                <div class="col-md-12">
-                    <ul class="pagination mt-5 justify-content-end">
-                        <?= $this->Paginator->prev("<<") ?>
-                        <?= $this->Paginator->next(">>") ?>
-                    </ul>
+            }
+        } else { ?>
+            <?php foreach ($categories as $item) {
+            ?>
+                <div class="col-md-9 mx-auto mt-3">
+                    <div class="card p-3" style="border: 0;box-shadow: 5px 5px 50px rgb(0 0 0 / 10%);border-left: 5px solid #26ba99;">
+                        <div class="row">
+                            <div class="col-10">
+                                <a href="/<?= $item->id ?>/question" class="text-decoration-none">
+                                    <h6 class="pt-2 pb-2 mt-2 text-dark"><?= $item->name ?> </h6>
+                                </a>
+                            </div>
+                            <div class="col-md-2">
+                                <?php if ($item->user_check != null) { ?>
+                                    <i class="fa fa-check-circle mt-3" style="color: blue;font-size:25px"></i>
+                                <?php } ?>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
+        <?php }
+        } ?>
+
     </div>
-    <div class="container footer pb-5 mt-5" style="border-top: 1px solid #26ba99;">
-        <div class="row mt-5">
-            <div class="col-md-4">
-                <h5 style="text-transform: uppercase;font-size: 15px;letter-spacing: 3px;font-weight: bolder;">hỗ trợ
-                    khách hàng</h5>
-                <div class="mt-3" style="width:100px;height:2px;background-image: linear-gradient(-30deg, #DC2424, #4A569D)"></div>
-                <h5 class="mt-2" style="text-transform: uppercase;font-size: 15px;letter-spacing: 3px;font-weight: bolder;">hotline
-                </h5>
-                <p style="font-size: 13px;">0766 667 020</p>
-                <h5 class="mt-2" style="text-transform: uppercase;font-size: 15px;letter-spacing: 3px;font-weight: bolder;">email
-                </h5>
-                <p style="font-size: 13px;">lctiendat@gmail.com</p>
-            </div>
-            <div class="col-md-4">
-                <h5 style="text-transform: uppercase;font-size: 15px;letter-spacing: 3px;font-weight: bolder;">về chúng
-                    tôi</h5>
-                <div class="mt-3 mb-3" style="width:100px;height:2px;background-image: linear-gradient(-30deg, #DC2424, #4A569D)"></div>
-                <p style="font-size: 13px;">Hỏi đáp</p>
-                <p style="font-size: 13px;">Bảo mật</p>
-
-                <p style="font-size: 13px;">Điều khoản</p>
-
-                <p style="font-size: 13px;">Blog</p>
-
-            </div>
-            <div class="col-md-4">
-                <h5 style="text-transform: uppercase;font-size: 15px;letter-spacing: 3px;font-weight: bolder;" class="mb-4">kết nối
-                </h5>
-                <i class="fab fa-facebook-square" style="color: darkblue;font-size: 40px;"></i>
-                <i class="fab fa-youtube-square ml-4" style="color: red;font-size: 40px;"></i>
+    <?php if (isset($result)) {
+        if ($result != [] && $countResult > PAGE_COUNT_CLIENT) { ?>
+            <ul class="pagination float-right mt-2">
+                <?= $this->Paginator->prev("Prev") ?>
+                <?= $this->Paginator->numbers() ?>
+                <?= $this->Paginator->next("Next") ?>
+            </ul>
+    <?php }
+    }
+    ?>
+    <?php if (isset($categories) && !isset($result)) {
+        if ($countCategory > PAGE_COUNT_CLIENT) { ?>
+            <ul class="pagination float-right mt-2">
+                <?= $this->Paginator->prev("Prev") ?>
+                <?= $this->Paginator->numbers() ?>
+                <?= $this->Paginator->next("Next") ?>
+            </ul>
+        <?php }
+        ?>
+</div>
+</div>
+<?php }
+?>
+</div>
+<div class="container footer pb-5 mt-5" style="border-top: 1px solid #26ba99;">
+    <div class="row mt-5">
+        <div class="col-md-4 col-6">
+            <h5>CUSTOMER SUPPORT</h5>
+            <div class="mt-3"></div>
+            <h5 class="mt-2">hotline</h5>
+            <p>0766 667 020</p>
+            <h5 class="mt-2">email</h5>
+            <p>lctiendat@gmail.com</p>
+        </div>
+        <div class="col-md-4 col-6">
+            <h5>about us</h5>
+            <div class="mt-3 mb-3"></div>
+            <p>Q&A</p>
+            <p>Security</p>
+            <p>Rules</p>
+            <p>Blog</p>
+        </div>
+        <div class="col-md-4">
+            <h5 class="mb-4">connection</h5>
+            <i class="fab fa-facebook-square"></i>
+            <i class="fab fa-youtube-square ml-4"></i>
+        </div>
+    </div>
+</div>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="fixed-bottom float-right r-0">
+                <p id='toTop' class="r-0 float-right"><i class="fa fa-angle-up mr-5 text-white"></i></p>
             </div>
         </div>
     </div>
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="fixed-bottom float-right r-0">
-                    <p id='toTop' class="r-0 float-right"><i class="fa fa-angle-up mr-5 text-white" style="background-image: linear-gradient(-30deg, #DC2424, #4A569D);padding:10px 20px"></i></p>
-                </div>
-            </div>
-        </div>
-    </div>
-
+</div>
 
 </body>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<?= $this->element('user/scriptBootstrap') ?>
 <script>
+    const url_domain_name = '<?= URL_DOMAIN_NAME  ?>'
     $(document).ready(() => {
         $(window).scroll(function() {
             if ($(this).scrollTop()) {
@@ -154,6 +158,19 @@
                 scrollTop: 0
             }, 1000);
         });
+        $('.back').click((e) => {
+            e.preventDefault();
+            window.history.back();
+        })
+        $('.backtoPrePage').click(() => {
+            if (document.referrer == '') {
+                window.location.href = url_domain_name
+            } else {
+
+            }
+
+        })
+
     })
 </script>
 

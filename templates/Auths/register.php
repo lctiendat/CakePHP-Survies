@@ -1,86 +1,68 @@
-<?php
-$this->disableAutoLayout();
-if (!isset($_SESSION)) {
-    session_start();
-}
-?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-
+    <?= $this->element('user/headerAuth') ?>
     <title>Register</title>
-
-    <!-- Custom fonts for this template-->
-    <link href="/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
-    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
-    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- Custom styles for this template-->
-    <link href="/css/admin/sb-admin-2.min.css" rel="stylesheet">
-    <style>
-        .error {
-            font-size: 13px;
-            color: red;
-        }
-    </style>
 </head>
 
 <body class="bg-gradient-primary">
 
-    <div class="container">
 
-        <div class="card o-hidden border-0 shadow-lg my-5">
-            <div class="card-body p-0">
-                <!-- Nested Row within Card Body -->
-                <div class="row">
-                    <div class="col-lg-5 d-none d-lg-block bg-register-image"></div>
-                    <div class="col-lg-7">
-                        <div class="p-5">
-                            <div class="text-center">
-                                <h1 class="h4 text-gray-900 mb-4">Create an Account!</h1>
-                            </div>
-                            <?= $this->Flash->render() ?>
-                            <form class="user" action="" method="post">
-                                <div class="form-group">
-                                    <input type="email" class="form-control form-control-user" name="email" id="exampleInputEmail" placeholder="Email Address">
+    <div class="container-fluid" style="margin-top: 100px;">
+        <div class="row p-5">
+            <div class="col-md-9 mx-auto">
+                <div class="card p-5" style="background:#F8F8FF;border-radius: 30px;border: 0;">
+                    <div class="row banner">
+                        <div class="col-md-5 col-6">
+                            <h1 class="mt-5"> DO YOU ALREADY HAVE<span style="color: #26ba99;"> AN ACCOUNT</span> </h1>
+                            <a href="/auths/login"><button>LOG IN NOW</button></a>
+                        </div>
+                        <div class="col-md-7 col-6" style="border-left:  1px solid gray;">
+                            <a href="/" style="background: #212529;border:0" class="btn btn-primary float-left mt-3 ml-3">On the homepage <i class="fa fa-long-arrow-alt-left"></i></a>
+                            <div class="p-5">
+                                <div class="text-center">
+                                    <h3 class="font-weight-bold text-gray-900 mb-4 mt-4">Create an Account!</h3>
                                 </div>
-                                <?php if (isset($errors['email'])) { ?>
-                                    <p class="error"><?= reset($errors['email']); ?></p>
-                                <?php } ?>
-                                <div class="form-group">
-                                    <input type="number" class="form-control form-control-user" name="phone" id="exampleInputEmail" placeholder="Your Phone">
-                                </div>
-                                <?php if (isset($errors['phone'])) { ?>
-                                    <p class="error"><?= reset($errors['phone']); ?></p>
-                                <?php } ?>
-                                <div class="form-group row">
-                                    <div class="col-sm-12 mb-3 mb-sm-0">
-                                        <input type="password" class="form-control form-control-user" name="password" id="exampleInputPassword" placeholder="Password">
+                                <?= $this->Flash->render() ?>
+                                <form class="user" action="" method="post">
+                                    <div class="form-group">
+                                        <input type="email" class="form-control form-control-user" name="email" id="email" placeholder="Email Address" value="<?php if (isset($_SESSION['arrOldValueSession']['OldValueEmail'])) { ?><?= $_SESSION['arrOldValueSession']['OldValueEmail'] ?>
+<?php  }
+                                                                                                                                                                unset($_SESSION['arrOldValueSession']['OldValueEmail']) ?>">
+                                        <span id="resultEmail"></span>
                                     </div>
-                                    <?php if (isset($_SESSION['errorPassword'])) { ?>
-                                        <p class="error ml-2 mt-2"><?= $_SESSION['errorPassword']; ?></p>
-                                    <?php }
-                                    unset($_SESSION['errorPassword']) ?>
-                                    <!-- <div class="col-sm-6">
-                                        <input type="password" class="form-control form-control-user" name="re_password" id="exampleRepeatPassword" placeholder="Repeat Password">
-                                    </div> -->
+                                    <?php if (isset($errors['email'])) { ?>
+                                        <p class="error"><?= reset($errors['email']); ?></p>
+                                    <?php } ?>
+                                    <div class="form-group">
+                                        <input type="text" onkeypress='validate(event)' class="form-control form-control-user" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" maxlength="10" name="phone" id="phone" placeholder="Your Phone" value="<?php if (isset($_SESSION['arrOldValueSession']['OldValuePhone'])) { ?><?= $_SESSION['arrOldValueSession']['OldValuePhone'] ?>
+<?php  }
+                                                                                                                                                                                                                                                                                                                        unset($_SESSION['arrOldValueSession']['OldValuePhone']) ?>">
+                                        <span id="resultPhone"></span>
+                                    </div>
+                                    <?php if (isset($errors['phone'])) { ?>
+                                        <p class="error w-100"><?= reset($errors['phone']); ?></p>
+                                    <?php } ?>
+                                    <div class="form-group row">
+                                        <div class="col-sm-12 mb-3 mb-sm-0">
+                                            <span style="font-size: 13px;color:red">* Password must include numbers, uppercase, lowercase, special characters and at least 8 characters</span>
+                                            <input type="password" class="form-control form-control-user" name="password" id="password-field" placeholder="Your password">
+                                            <span toggle="#password-field" class="fa fa-fw fa-eye field-icon toggle-password text-dark mr-2"></span>
+                                            <span id="resultPassword" style="display: none;"></span>
+                                        </div>
+                                        <?php if (isset($errors['password'])) { ?>
+                                            <p class="error mt-3 ml-3 w-100"><?= reset($errors['password']); ?></p>
+                                        <?php } ?>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-user btn-block" style="margin-top:0">
+                                        Register Account
+                                    </button>
+                                </form>
+                                <hr>
+                                <div class="text-center">
+                                    <a class="small" href="/auths/login">Already have an account? Login!</a>
                                 </div>
-                                <button type="submit" class="btn btn-primary btn-user btn-block">
-                                    Register Account
-                                </button>
-                            </form>
-                            <hr>
-                            <!-- <div class="text-center">
-                                <a class="small" href="forgot-password.html">Forgot Password?</a>
-                            </div> -->
-                            <div class="text-center">
-                                <a class="small" href="/Auth/login">Already have an account? Login!</a>
                             </div>
                         </div>
                     </div>
@@ -89,87 +71,100 @@ if (!isset($_SESSION)) {
         </div>
 
     </div>
-
-    <!-- Bootstrap core JavaScript-->
-    <script src="/vendor/jquery/jquery.min.js"></script>
-    <script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Core plugin JavaScript-->
-    <script src="/vendor/jquery-easing/jquery.easing.min.js"></script>
-
-    <!-- Custom scripts for all pages-->
-    <script src="/js/admin/sb-admin-2.min.js"></script>
-    <!-- <script>
-        $(document).ready(() => {
-            $('button[type="submit"]').click((e) => {
-                e.preventDefault()
-                let email = $('input[name="email"]').val();
-                let phone = $('input[name="phone"]').val();
-                let password = $('input[name="password"]').val();
-                let repassword = $('input[name="re_password"]').val();
-                if (email == '') {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: 'Email chưa được điền !',
-                    })
-                } else if (phone == '') {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: 'Phone chưa được điền',
-                    })
-                } else if (password == '') {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: 'Passwword chưa được điền',
-                    })
-                } else if (repassword == '') {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: ' Re Password chưa được điền',
-                    })
-                } else if (repassword != password) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: 'Mật khẩu nhập lại không giống !',
-                    })
-                } else {
-                    $.ajax({
-                        url: 'https://lctiendat.vn/Auth/register',
-                        type: 'POST',
-                        cache: false,
-                        data: {
-                            email: email,
-                            phone: phone,
-                            password: password,
-                        },
-                        success(response) {
-                            var getData = JSON.parse(JSON.stringify(response))
-                            // Swal.fire({
-                            //     icon: 'success',
-                            //     title: 'Oops...',
-                            //     text: 'ok',
-                            // })
-                            console.log(getData)
-                        },
-                        error(response) {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Oops...',
-                                text: 'cc',
-                            })
-                            console.log(response)
-
-                        },
-                    })
-                }
-            })
-        })
-    </script> -->
+    </div>
 </body>
+<?= $this->element('user/scriptBootstrap') ?>
 
 </html>
+<script>
+    function validate(evt) {
+        var theEvent = evt || window.event;
+        if (theEvent.type === 'paste') {
+            key = event.clipboardData.getData('text/plain');
+        } else {
+            var key = theEvent.keyCode || theEvent.which;
+            key = String.fromCharCode(key);
+        }
+        var regex = /[0-9]|\./;
+        if (!regex.test(key)) {
+            theEvent.returnValue = false;
+            if (theEvent.preventDefault) theEvent.preventDefault();
+        }
+    }
+    $(".toggle-password").click(function() {
+        $(this).toggleClass("fa-eye fa-eye-slash");
+        var input = $($(this).attr("toggle"));
+        if (input.attr("type") == "password") {
+            input.attr("type", "text");
+        } else {
+            input.attr("type", "password");
+        }
+    });
+
+    function regExpEmail(email) {
+        const re = /^[a-z0-9.]+@[a-z0-9]+\.[a-z]{2,}$/;
+        return re.test(email);
+    }
+
+    function validateEmail() {
+        const $result = $("#resultEmail");
+        const email = $("#email").val();
+        $result.text("");
+        if (regExpEmail(email)) {
+            $result.text("✔");
+            $result.css("color", "green");
+            $result.css("fontSize", "13px");
+            $("#email").css('border', '1px solid green')
+        } else {
+            $result.text("❌");
+            $result.css("color", "red");
+            $result.css("fontSize", "13px");
+            $("#email").css('border', '1px solid red')
+
+        }
+        return false;
+    }
+
+    function regExpPhone(phone) {
+        const regexp = /^(((0))[0-9]{9})$/g;
+        return regexp.test(phone);
+    }
+
+    function validatePhone() {
+        let phone = $('#phone').val().trim();
+        let resultPhone = $('#resultPhone');
+        if (regExpPhone(phone) == false) {
+            resultPhone.text("❌");
+            resultPhone.css("color", "red");
+            resultPhone.css("fontSize", "13px");
+            $("#phone").css('border', '1px solid red')
+        } else {
+            resultPhone.text("✔");
+            resultPhone.css("color", "green");
+            resultPhone.css("fontSize", "13px");
+            $("#phone").css('border', '1px solid green')
+        }
+    }
+
+    function regExpPassword(password) {
+        const regexp = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/
+        return regexp.test(password)
+    }
+
+    function validatePassword() {
+        let password = $('#password-field').val();
+        if (regExpPassword(password) == false) {
+            $('#resultPassword').show();
+            $('#password-field').css('border', '1px solid red');
+            $('#password-field').css("fontSize", "13px");
+        } else {
+            $('#resultPassword').hide();
+            $('.toggle-password').show()
+            $('#password-field').css('border', '1px solid green');
+            $('#password-field').css("fontSize", "13px");
+        }
+    }
+    $("#email").on("blur", validateEmail);
+    $("#phone").on("blur", validatePhone);
+    $("#password-field").on("blur", validatePassword);
+</script>

@@ -1,138 +1,120 @@
-<?php
-$this->disableAutoLayout();
-if (!isset($_SESSION)) {
-    session_start();
-}
-
-?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-
+    <?= $this->element('user/headerAuth') ?>
     <title>Login</title>
-
-    <!-- Custom fonts for this template-->
-    <link href="/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
-    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
-    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- Custom styles for this template-->
-    <link href="/css/admin/sb-admin-2.min.css" rel="stylesheet">
-
 </head>
 
 <body class="bg-gradient-primary">
-
-    <div class="container">
-
-        <!-- Outer Row -->
-        <div class="row justify-content-center">
-
-            <div class="col-xl-10 col-lg-12 col-md-9">
-
-                <div class="card o-hidden border-0 shadow-lg my-5">
-                    <div class="card-body p-0">
-                        <!-- Nested Row within Card Body -->
-                        <div class="row">
-                            <div class="col-lg-6 d-none d-lg-block bg-login-image"></div>
-                            <div class="col-lg-6">
-                                <div class="p-5">
+    <div class="container-fluid" style="margin-top: 100px;">
+        <div class="row p-5">
+            <div class="col-md-8 mx-auto">
+                <div class="card p-5" style="background:#F8F8FF;border-radius: 30px;border: 0;">
+                    <div class="row banner">
+                        <div class="col-md-6">
+                            <h1 class="mt-5"> DO NOT HAVE <span style="color: #26ba99;">AN ACCOUNT</span> </h1>
+                            <a href="/auths/register"><button>CREATE AN ACCOUNT</button></a>
+                        </div>
+                        <div class="col-md-6" style="border-left:  1px solid gray;">
+                            <a href="/" style="background: #212529;border:0" class="btn btn-primary float-lèt mt-3 ml-3">On the homepage <i class="fa fa-long-arrow-alt-left"></i></a>
+                            <div class="p-5">
                                 <?= $this->Flash->render() ?>
-                                    <div class="text-center">
-                                        <h1 class="h4 text-gray-900 mb-4">Welcome Back!</h1>
+                                <div class="text-center">
+                                    <h1 class="h4 text-gray-900 mb-4">Welcome Back!</h1>
+                                </div>
+                                <form class="user" action="" method="post">
+                                    <div class="form-group">
+                                        <input type="email" class="form-control form-control-user" name="email" id="exampleInputEmail" aria-describedby="emailHelp" placeholder="Enter Email Address..." value="<?php if (isset($_SESSION['arrOldValueSession']['OldValueEmail'])) { ?><?= $_SESSION['arrOldValueSession']['OldValueEmail'] ?>
+<?php  }
+                                                                                                                                                                                                                unset($_SESSION['arrOldValueSession']['OldValueEmail']) ?>">
+                                        <span id="resultEmail"></span>
+
                                     </div>
-                                    <form class="user" action="/Auth/login" method="post">
-                                        <div class="form-group">
-                                            <input type="email"  class="form-control form-control-user" name="email" id="exampleInputEmail" aria-describedby="emailHelp" placeholder="Enter Email Address...">
-                                        </div>
-                                        <div class="form-group">
-                                            <input type="password"  class="form-control form-control-user" name="password" id="exampleInputPassword" placeholder="Password">
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="custom-control custom-checkbox small">
-                                                <input type="checkbox" class="custom-control-input" id="customCheck">
-                                                <label class="custom-control-label" for="customCheck">Remember
-                                                    Me</label>
-                                            </div>
-                                        </div>
-                                        <button type="submit" class="btn btn-primary btn-user btn-block">
-                                            Login
-                                        </button>
-                                    
-                                    </form>
-                                    <hr>
-                                    <div class="text-center">
-                                        <a class="small" href="/Auth/forget">Forgot Password?</a>
+                                    <div class="form-group">
+                                        <input type="password" class="form-control form-control-user" name="password" id="password-field" id="" placeholder="Password">
+                                        <span toggle="#password-field" class="fa fa-fw fa-eye field-icon toggle-password text-dark mr-2"></span>
                                     </div>
-                                    <div class="text-center">
-                                        <a class="small" href="/Auth/register">Create an Account!</a>
-                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-user btn-block" style="margin-top:0">
+                                        Login
+                                    </button>
+                                </form>
+                                <hr>
+                                <div class="text-center">
+                                    <a class="small" href="/auths/forget">Forgot Password?</a>
+                                </div>
+                                <div class="text-center">
+                                    <a class="small" href="/auths/register">Create an Account!</a>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
             </div>
-
         </div>
 
     </div>
-
-    <!-- Bootstrap core JavaScript-->
-    <script src="/vendor/jquery/jquery.min.js"></script>
-    <script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Core plugin JavaScript-->
-    <script src="/vendor/jquery-easing/jquery.easing.min.js"></script>
-
-    <!-- Custom scripts for all pages-->
-    <script src="/js/admin/sb-admin-2.min.js"></script>
+    </div>
 </body>
+<?= $this->element('user/scriptBootstrap') ?>
 
 </html>
-<!-- <script>
+<script>
     $(document).ready(() => {
-        $('button[type="submit"]').click((e) => {
-            e.preventDefault();
-            var email = $('input[name="email"]').val()
-            var password = $('input[name="password"]').val()
+        $(".toggle-password").click(function() {
 
-            if (email == '') {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Oops...',
-                    text: 'Email không được để trống',
-                })
-            } else if (password == '') {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Oops...',
-                    text: 'Password không được để trống',
-                })
+            $(this).toggleClass("fa-eye fa-eye-slash");
+            var input = $($(this).attr("toggle"));
+            if (input.attr("type") == "password") {
+                input.attr("type", "text");
             } else {
-                $.ajax({
-                    url: '/Auth/login',
-                    type: 'POST',
-                    data: {
-                        email: email,
-                        password: password
-                    },
-                    success(data) {
-                        var getData = JSON.parse(data);
-                        console.log(getData)
-                    },
-                    error(data) {
-                        alert('no')
-                    }
-                })
+                input.attr("type", "password");
             }
-        })
+        });
     })
-</script> -->
+
+    function regExpEmail(email) {
+        const re = /^[a-z0-9.]+@[a-z0-9]+\.[a-z]{2,}$/;
+        return re.test(email);
+    }
+
+    function validateEmail() {
+        const $result = $("#resultEmail");
+        const email = $("#email").val();
+        $result.text("");
+        if (regExpEmail(email)) {
+            $result.text("✔");
+            $result.css("color", "green");
+            $result.css("fontSize", "13px");
+            $("#email").css('border', '1px solid green')
+        } else {
+            $result.text("❌");
+            $result.css("color", "red");
+            $result.css("fontSize", "13px");
+            $("#email").css('border', '1px solid red')
+
+        }
+        return false;
+    }
+
+    function regExpPassword(password) {
+        const regexp = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/
+        return regexp.test(password)
+    }
+
+    function validatePassword() {
+        let password = $('#password-field').val();
+        if (regExpPassword(password) == false) {
+            $('#resultPassword').show();
+            $('#password-field').css('border', '1px solid red');
+            $('#password-field').css("fontSize", "13px");
+        } else {
+            $('#resultPassword').hide();
+            $('.toggle-password').show()
+            $('#password-field').css('border', '1px solid green');
+            $('#password-field').css("fontSize", "13px");
+        }
+    }
+    $("#email").on("blur", validateEmail);
+    $("#password-field").on("blur", validatePassword);
+</script>

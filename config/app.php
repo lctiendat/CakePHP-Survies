@@ -57,7 +57,7 @@ return [
         'webroot' => 'webroot',
         'wwwRoot' => WWW_ROOT,
         //'baseUrl' => env('SCRIPT_NAME'),
-       //'uploadedFilesAsObjects' => false,
+        //'uploadedFilesAsObjects' => false,
         'fullBaseUrl' => false,
         'imageBaseUrl' => 'img/',
         'cssBaseUrl' => 'css/',
@@ -180,15 +180,21 @@ return [
      *   should be ignored in. Use this to ignore deprecations for plugins or parts of
      *   your application that still emit deprecations.
      */
+    // 'Error' => [
+    //     'errorLevel' => E_ALL,
+    //     'exceptionRenderer' => ExceptionRenderer::class,
+    //     'skipLog' => [],
+    //     'log' => true,
+    //     'trace' => true,
+    //     'ignoredDeprecationPaths' => [],
+    // ],
     'Error' => [
         'errorLevel' => E_ALL,
-        'exceptionRenderer' => ExceptionRenderer::class,
+        'exceptionRenderer' => 'App\Error\MyExceptionRenderer',
         'skipLog' => [],
         'log' => true,
         'trace' => true,
-        'ignoredDeprecationPaths' => [],
     ],
-
     /*
      * Debugger configuration
      *
@@ -252,7 +258,7 @@ return [
         // Sample SMTP configuration
         'gmail' => [
             'host' => 'smtp.gmail.com',
-            'port' => 587,
+            'port' => 465,
             'username' => 'lctiendat@gmail.com',
             'password' => 'Tiendat11082000',
             'className' => 'Smtp',
@@ -314,7 +320,7 @@ return [
             /*
              * For MariaDB/MySQL the internal default changed from utf8 to utf8mb4, aka full utf-8 support, in CakePHP 3.6
              */
-            //'encoding' => 'utf8mb4',
+            'encoding' => 'utf8mb4',
 
             /*
              * If your MySQL server is configured with `skip-character-set-client-handshake`
@@ -353,7 +359,7 @@ return [
             'driver' => Mysql::class,
             'persistent' => false,
             'timezone' => 'UTC',
-            //'encoding' => 'utf8mb4',
+            'encoding' => 'utf8mb3',
             'flags' => [],
             'cacheMetadata' => true,
             'quoteIdentifiers' => false,

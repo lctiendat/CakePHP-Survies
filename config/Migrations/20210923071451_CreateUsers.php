@@ -52,7 +52,7 @@ class CreateUsers extends AbstractMigration
             'null' => false,
         ]);
         $table->addColumn('role', 'integer', [
-            'default' => 1,
+            'default' => 0,
             'limit' => 1,
             'null' => false,
         ]);

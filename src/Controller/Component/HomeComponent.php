@@ -5,210 +5,760 @@ declare(strict_types=1);
 namespace App\Controller\Component;
 
 use App\Controller\Component\CommonComponent;
-use Cake\Database\Expression\QueryExpression;
-use Cake\Database\Query;
-use Cake\Datasource\ConnectionManager;
-use Cake\ORM\TableRegistry;
+use App\Model\Entity\Result;
+use PHPMailer\PHPMailer\PHPMailer;;
 
 class HomeComponent extends CommonComponent
 {
-    public $controller = null;
-    public $session = null;
+    /**
+     * Initialize method
+     */
     public function initialize(array $config): void
     {
-        $this->loadModel(['Survies', 'Answers', 'Categories', 'Results', 'Users']);
+        $this->loadModel([
+            'Survies',
+            'Answers',
+            'Categories',
+            'Results',
+            'Users'
+        ]);
     }
 
-    // lấy Survies mà có câu hỏi
-    public function getSurviesHaveInAnswer()
+    /**
+     * Handle get survey have answer method
+     */
+    public function getSortCategoryHaveSurvey($user_id)
     {
-        return $this->Survies->find()
-            ->select(['category' => 'Categories.name', 'question', 'id' => 'Survies.id', 'category_id'])
-            ->innerJoinWith('Categories')
-            ->where(['Survies.id IN' => $this->Answers->find()->select('survey_id')])->order(['Survies.id' => 'desc']);
+        $query = $this->Categories->find()
+            ->select([
+                'name' => 'Categories.name',
+                'id' => 'Categories.id',
+                'user_check' => 'Results.user_id'
+            ])
+            ->join([
+                'table' => 'results',
+                'alias' => 'Results',
+                'type' => 'left',
+                'conditions' =>
+                [
+                    'Categories.id = Results.category_id',
+                    'Results.user_id = ' . $user_id
+                ]
+            ])
+            ->where([
+                'Categories.id IN' => $this->Survies->find()
+                    ->select('category_id')
+                    ->where(['Survies.DELETE_FLG' => 0]),
+                'Categories.DELETE_FLG' => 0
+            ])
+            ->order([
+                'user_id',
+                'Categories.id' => 'DESC'
+            ])
+            ->group('Categories.id');
+        return $query;
     }
 
-    //Lấy tất cả Category
+    public function getSortAndSearchCategoryHaveSurvey($user_id = '', $key = '')
+    {
+        $query = $this->Categories->find()
+            ->select([
+                'name' => 'Categories.name',
+                'id' => 'Categories.id',
+                'user_check' => 'Results.user_id'
+            ])
+            ->join([
+                'table' => 'results',
+                'alias' => 'Results',
+                'type' => 'left',
+                'conditions' =>
+                [
+                    'Categories.id = Results.category_id',
+                    'Results.user_id = ' . $user_id
+                ]
+            ])
+            ->where([
+                'name LIKE ' => '%' . $key . '%',
+                'Categories.id IN' => $this->Survies->find()
+                    ->select('category_id')
+                    ->where(['Survies.DELETE_FLG' => 0]),
+                'Categories.DELETE_FLG' => 0
+            ])
+            ->order([
+                'user_id',
+                'Categories.id' => 'DESC'
+            ])
+            ->group('Categories.id');;
+        return $query;
+    }
+
+    /**
+     * Handle get all category method
+     */
     public function getAllCategory()
     {
-        return $this->Categories->find()->where(['DELETE_FLG' => 0])->all();
-    }
-
-    //Lấy những Survey phải có Answer dựa id của Category
-    public function getSurviesHaveInAnswerByCategoryId($id)
-    {
-        return $this->Survies->find()
-            ->select(['category' => 'Categories.name', 'question', 'id' => 'Survies.id', 'category_id'])
-            ->innerJoinWith('Categories')
-            ->where(['category_id' => $id])
-            ->where(['Survies.id IN' => $this->Answers->find()->select('survey_id')]);
-    }
-
-    // lấy category dựa theo id
-    public function getCategoryById($id)
-    {
-        return $this->Categories->find()
-            ->where(['id' => $id])
+        $query = $this->Categories->find()
+            ->where(['DELETE_FLG' => 0])
             ->all();
+        return $query;
     }
 
-    // lấy survey dựa theo id
+    public function getCategoryHaveSurvey()
+    {
+        $query = $this->Categories->find()
+            ->select(['id', 'name'])
+            ->where([
+                'DELETE_FLG' => 0,
+                'id IN' => $this->Survies->find()
+                    ->select('category_id')
+                    ->where(['DELETE_FLG' => 0])
+            ])
+            ->order(['id' => 'desc']);
+        return $query;
+    }
+
+    /**
+     * Handle get survey have answer by category method
+     */
+    public function getSurviesHaveAnswerByCategory($id)
+    {
+        $query = $this->Survies->find()
+            ->where([
+                'id IN' => $this->Answers->find()
+                    ->select('survey_id')
+                    ->where(['Answers.DELETE_FLG' => 0]),
+                'Survies.DELETE_FLG' => 0,
+                'category_id' => $id
+            ])
+            ->toArray();
+        return $query;
+    }
+
+    /**
+     * Handle get survey by id method
+     */
     public function getSurveyById($id)
     {
-        return $this->Survies->find()->where(['id' => $id])->all();
+        $query = $this->Survies->find()
+            ->where([
+                'id' => $id,
+                'DELETE_FLG' => 0
+            ])
+            ->all();
+        return $query;
     }
 
-    // lấy answer dựa theo survey id
-    public function getAnswerBySurveyId($id)
-    {
-        return $this->Answers->find()
-            ->where(['survey_id' => $id])->where(['DELETE_FLG' => 0])->all();
-    }
+    /**
+     * Handle save voted from user
+     */
 
-    // lấy result dựa theo survey id và user id
-    public function getResultBySurveyIdAndUserId($survey_id, $user_id)
+    public function saveVoted($data)
     {
-        return $this->Results->find()->where(['survey_id' => $survey_id])->where(['user_id' => $user_id])->all();
-    }
-
-    // xử lí phần update answer
-    public function updateAnswer($data)
-    {
-        $user_id = $data['user_id'];
-        $save_result = $this->Results->query();
-        $save_result->update()->set($data)->where(['user_id' => $user_id])->execute();
-    }
-
-    // xử lí phần lưu answer
-    public function saveAnswer($datas, $type_select)
-    {
-        if ($type_select == 2) {
-            foreach ($datas as $data) {
-                $save_result = $this->Results->query();
-                $save_result->insert(['survey_id', 'answer_id', 'user_id', 'created', 'modified'])
-                    ->values($data)
-                    ->execute();
-            }
-        } else {
-            $save_result = $this->Results->query();
-            $save_result->insert(['survey_id', 'answer_id', 'user_id', 'created', 'modified'])
-                ->values($datas)
+        foreach ($data as $value) {
+            $query = $this->Results->query();
+            $query->insert([
+                'category_id',
+                'survey_id',
+                'answer_id',
+                'user_id',
+                'created',
+                'modified'
+            ])
+                ->values($value)
                 ->execute();
         }
     }
 
-    // xử lí phần lưu user
-    public function saveUser($data)
+    /**
+     * Handle get answer by user method
+     */
+    public function getAnswerByUser($user_id = '')
     {
-        $save_user = $this->Users->query();
-        $save_user->insert(['email', 'phone', 'password', 'created', "modified"])
-            ->values($data)
-            ->execute();
-    }
-
-    //lấy answer dựa theo user
-    public function getAnswerByUser($user_id, $survey_id)
-    {
-        return $this->Results->find()->where(['survey_id' => $survey_id])->where(['user_id' => $user_id])->all();
-    }
-
-    // lấy result dựa theo answer id
-    public function getResultByAnswerId($user_id, $survey_id, $answer_id)
-    {
-        return $this->Results->find()->where(['survey_id' => $survey_id])->where(['user_id' => $user_id])->where(['answer_id' => $answer_id])->all();
-    }
-
-    // kiểm tra result
-    public function checkResult($user_id, $survey_id, $answer_id)
-    {
-        return $this->Results->find()->where(['survey_id' => $survey_id])->where(['user_id' => $user_id])->where(['answer_id' => $answer_id])->all();
-    }
-
-    // xử lí phần cập nhật nhiều answer
-    public function updateMoreAnswer($id_survey, $item, $user_id)
-    {
-        $save_user = $this->Results->query();
-        $save_user->insert(['survey_id', 'answer_id', 'user_id', 'created', "modified"])
-            ->values([
-                'survey_id' => $id_survey, 'answer_id' => $item, 'user_id' => $user_id, 'created' => date('Y-m-d H:m:s'),
-                'modified' => date('Y-m-d H:m:s')
+        $query = $this->Results->find()
+            ->select('answer_id')
+            ->where([
+                'user_id' => $user_id,
             ])
-            ->execute();
+            ->all();
+
+        return $query;
     }
 
-    // xử lí phần xóa result mà không được chọn
-    public function deleteResultNoChoose($answer_id, $survey_id, $user_id)
+    /**
+     * Handle check result method
+     */
+    public function checkResult($user_id, $category_id)
     {
-        $delete_user = $this->Results->query();
-        $delete_user->delete()
-            ->where(['NOT' => [
-                'answer_id IN' => $answer_id,
-            ]])
-            ->where(['survey_id' => $survey_id])
-            ->where(['user_id' => $user_id])->execute();
+        $query = $this->Results->find()
+            ->where([
+                'category_id' => $category_id,
+                'user_id' => $user_id,
+            ])
+            ->toArray();
+        return $query;
     }
 
-    // xử lí phần tìm kiếm
+    /**
+     * Handle search in admin method
+     */
     public function search($key, $model, $item)
     {
         switch ($model) {
             case 'Survies':
-                return $this->Survies->find()
-                    ->select(['category' => 'Categories.name', 'question', 'created', 'Survies.id', 'status'])
-                    ->innerJoinWith('Categories')
-                    ->where(['' . $item . ' LIKE ' => '%' . $key . '%'])
-                    ->toArray();
+                return $this->$model->find()
+                    ->select([
+                        'category' => 'Categories.name',
+                        'question',
+                        'created',
+                        'Survies.id',
+                        'status',
+                        'category_id',
+                        'count' => 'Results.survey_id'
+                    ])
+                    ->join([
+                        'table' => 'categories',
+                        'alias' => 'Categories',
+                        'type' => 'left',
+                        'conditions' =>
+                        ['Categories.id = Survies.category_id']
+                    ])
+                    ->join([
+                        'table' => 'results',
+                        'alias' => 'Results',
+                        'type' => 'left',
+                        'conditions' =>
+                        ['Survies.id = Results.survey_id']
+                    ])
+                    ->where([
+                        'Survies.DELETE_FLG' => 0,
+                        'OR' => [
+                            '' . $item . ' LIKE ' => '%' . $key . '%',
+                            'Categories.name LIKE ' => '%' . $key . '%',
+                            'Survies.created LIKE ' => '%' . $key . '%',
+                        ]
+                    ])
+                    ->order(['Survies.id' => 'desc'])
+                    ->group('Survies.id');;
                 break;
             case 'Categories':
-                return $this->$model->find()->where(['' . $item . ' LIKE ' => '%' . $key . '%'])->toArray();
+                return $this->$model->find()
+                    ->where([
+                        'DELETE_FLG' => 0,
+                        'OR' => [
+                            '' . $item . ' LIKE ' => '%' . $key . '%',
+                            'created LIKE ' => '%' . $key . '%',
+                        ]
+                    ])
+                    ->order(['Categories.id' => 'desc']);
                 break;
             case 'Answers':
-                return $this->$model->find()->select(['question' => 'Survies.question', 'name', 'created', 'Answers.id'])->innerJoinWith('Survies')->where(['' . $item . ' LIKE ' => '%' . $key . '%'])->toArray();
+                return $this->$model->find()
+                    ->select([
+                        'question' => 'Survies.question',
+                        'name',
+                        'created',
+                        'Answers.id'
+                    ])
+                    ->join([
+                        'table' => 'survies',
+                        'alias' => 'Survies',
+                        'type' => 'left',
+                        'conditions' => ['Survies.id = Answers.survey_id']
+                    ])
+                    ->where([
+                        '' . $item . ' LIKE ' => '%' . $key . '%',
+                        'Answers.DELETE_FLG' => 0
+                    ])
+                    ->order(['Answers.id' => 'desc']);
                 break;
             case 'Users':
-                return $this->$model->find()->where(['' . $item . ' LIKE ' => '%' . $key . '%'])->toArray();
+                return $this->$model->find()
+                    ->select([
+                        'email',
+                        'phone',
+                        'str_status' => 'CASE WHEN status = 2 THEN "Enable" ELSE"Disable" END',
+                        'str_role' => 'CASE WHEN role = 2 THEN "Admin" ELSE"User" END'
+                    ])
+                    ->where([
+                        'DELETE_FLG' => 0,
+                        'OR' => [
+                            '' . $item . ' LIKE ' => '%' . $key . '%',
+                            'phone LIKE ' => '%' . $key . '%',
+                        ]
+                    ])
+                    ->order(['Users.id' => 'desc']);
+
             default:
                 break;
         }
     }
 
-    // đếm survey theo category
-    public function countSurveyInCategory()
+    /**
+     * Handle search answer by survey method
+     */
+    public function searchHistorySurveyUserChoose($user_id, $key)
     {
-        return $this->Survies->find()->select(['CategoryId' => 'Categories.id', 'CategoryName' => 'Categories.name', 'count' => 'COUNT(*)', 'category_id'])->innerJoinWith('Categories')->group('category_id');
+        $query = $this->Categories->find()
+            ->select([
+                'name' => 'Categories.name',
+                'id' => 'Categories.id'
+            ])
+            ->join([
+                'table' => 'results',
+                'alias' => 'Results',
+                'type' => 'left',
+                'conditions' =>
+                ['Categories.id = Results.category_id']
+            ])
+            ->where([
+                'Results.user_id' => $user_id,
+                'Categories.name LIKE ' => '%' . $key . '%',
+                'Categories.DELETE_FLG' => 0
+            ])
+            ->group('Categories.id');
+        return $query;
     }
 
-    // đếm tổng số lượng category
-    public function countQualityCategory()
+    /**
+     * Handle search in home method
+     */
+    public function searchHome($key)
     {
-        return $this->Categories->find()->select(['count' => 'COUNT(*)']);
+        $query = $this->Categories->find()
+            ->select(['id', 'name'])
+            ->where([
+                'DELETE_FLG' => 0,
+                'id IN' => $this->Survies->find()
+                    ->select('category_id')
+                    ->where(['DELETE_FLG' => 0]),
+                'name LIKE ' => '%' . $key . '%',
+            ])
+            ->order(['id' => 'desc']);
+        return $query;
     }
 
-    // đếm tổng số lượng survey
-
-    public function countQualitySurvey()
+    /**
+     * Handle count static method
+     */
+    public function countQuality($model)
     {
-        return $this->Survies->find()->select(['count' => 'COUNT(*)']);
+        $query = $this->$model->find()
+            ->select(['count' => 'COUNT(*)']);
+        return $query;
     }
 
-    // đếm tổng số lượng answer
-
-    public function countQualityAnswer()
+    /**
+     * Handle count static method
+     */
+    public function countQualityToday($model)
     {
-        return $this->Answers->find()->select(['count' => 'COUNT(*)']);
+        $query = $this->$model->find()
+            ->select(
+                ['count' => 'COUNT(*)']
+            )
+            ->where([
+                'created LIKE' => '%' . date('Y-m-d') . '%'
+            ]);
+        return $query;
     }
 
-    // đếm tổng số lượng user
-
-    public function countQualityUser()
-    {
-        return $this->Users->find()->select(['count' => 'COUNT(*)']);
-    }
-
-    // xử lí phần chuyển hướng nếu dữ liệu không tồn tại
-
+    /**
+     * Handle check id isset method
+     */
     public function checkIdIsset($id, $model)
     {
-        return $this->$model->find()->where(['id' => $id])->all();
+        $query = $this->$model->find()
+            ->where([
+                'id' => $id,
+                'DELETE_FLG' => 0
+            ])
+            ->all();
+        return $query;
+    }
+
+    /**
+     * Handle get all survey user voted method
+     */
+    public function getSurveyUserChoosed($user_id)
+    {
+        $query = $this->Survies->find()
+            ->select([
+                'question',
+                'SurveyId' => 'Survies.id',
+                'categoryName' => 'Categories.name',
+                'categoryId' => 'Categories.id'
+            ])
+            ->join([
+                'table' => 'results',
+                'alias' => 'Results',
+                'type' => 'left',
+                'conditions' =>
+                ['Survies.id = Results.survey_id']
+            ])->join([
+                'table' => 'categories',
+                'alias' => 'Categories',
+                'type' => 'left',
+                'conditions' =>
+                ['Categories.id = Survies.category_id']
+            ])
+            ->where([
+                'Results.user_id' => $user_id,
+                'Survies.DELETE_FLG' => 0
+            ])
+            ->group('Survies.id');
+        return $query;
+    }
+
+    /**
+     * Handle get most answer voted method
+     */
+    public function ranking()
+    {
+        $query = $this->Results->find()
+            ->select([
+                'quanlity' => 'COUNT(*)',
+                'question' => 'Survies.question',
+                'survey_id'
+            ])
+            ->join([
+                'table' => 'survies',
+                'alias' => 'Survies',
+                'type' => 'left',
+                'conditions' =>
+                ['Survies.id = Results.survey_id']
+            ])
+            ->where(['Survies.DELETE_FLG' => 0])
+            ->group('survey_id')
+            ->order(['quanlity' => 'DESC'])
+            ->limit(10);
+        return $query;
+    }
+
+    /**
+     * Handle sort data at admin
+     */
+    public function sortDataAdmin($key, $model, $sort, $direction)
+    {
+        if ($key == '') {
+            switch ($model) {
+                case 'Survies':
+                    return $this->$model->find()
+                        ->select([
+                            'category' => 'Categories.name',
+                            'question',
+                            'created',
+                            'Survies.id',
+                            'status',
+                            'category_id',
+                            'count' => 'Results.survey_id'
+                        ])
+                        ->join([
+                            'table' => 'categories',
+                            'alias' => 'Categories',
+                            'type' => 'left',
+                            'conditions' =>
+                            ['Categories.id = Survies.category_id']
+                        ])
+                        ->join([
+                            'table' => 'results',
+                            'alias' => 'Results',
+                            'type' => 'left',
+                            'conditions' =>
+                            ['Survies.id = Results.survey_id']
+                        ])
+                        ->where([
+                            'Survies.DELETE_FLG' => 0,
+                        ])
+                        ->order([$sort => $direction])
+                        ->group('Survies.id');
+                    break;
+                case 'Categories':
+                    return $this->$model->find()
+                        ->where([
+                            'DELETE_FLG' => 0,
+                        ])
+                        ->order([$sort  => $direction]);
+                    break;
+                case 'Answers':
+                    return $this->$model->find()
+                        ->select([
+                            'question' => 'Survies.question',
+                            'name',
+                            'created',
+                            'Answers.id'
+                        ])
+                        ->join([
+                            'table' => 'survies',
+                            'alias' => 'Survies',
+                            'type' => 'left',
+                            'conditions' => ['Survies.id = Answers.survey_id']
+                        ])
+                        ->where([
+                            'Answers.DELETE_FLG' => 0
+                        ])
+                        ->order([$sort => $direction]);
+                    break;
+                case 'Users':
+                    return $this->$model->find()
+                        ->select([
+                            'email',
+                            'phone',
+                            'str_status' => 'CASE WHEN status = 2 THEN "Enable" ELSE"Disable" END',
+                            'str_role' => 'CASE WHEN role = 2 THEN "Admin" ELSE"User" END'
+                        ])
+                        ->where([
+                            'DELETE_FLG' => 0,
+                        ])
+                        ->order(['Users.' . $sort => $direction]);
+
+                default:
+                    break;
+            }
+        } else {
+            switch ($model) {
+                case 'Survies':
+                    return $this->$model->find()
+                        ->select([
+                            'category' => 'Categories.name',
+                            'question',
+                            'created',
+                            'Survies.id',
+                            'status',
+                            'category_id',
+                            'count' => 'Results.survey_id'
+                        ])
+                        ->join([
+                            'table' => 'categories',
+                            'alias' => 'Categories',
+                            'type' => 'left',
+                            'conditions' =>
+                            ['Categories.id = Survies.category_id']
+                        ])
+                        ->join([
+                            'table' => 'results',
+                            'alias' => 'Results',
+                            'type' => 'left',
+                            'conditions' =>
+                            ['Survies.id = Results.survey_id']
+                        ])
+                        ->where([
+                            'Survies.DELETE_FLG' => 0,
+                            'OR' => [
+                                'question LIKE ' => '%' . $key . '%',
+                                'Categories.name LIKE ' => '%' . $key . '%',
+                                'Survies.created LIKE ' => '%' . $key . '%',
+                            ]
+                        ])
+                        ->order([$sort => $direction])
+                        ->group('Survies.id');;
+                    break;
+                case 'Categories':
+                    return $this->$model->find()
+                        ->where([
+                            'DELETE_FLG' => 0,
+                            'OR' => [
+                                'name LIKE ' => '%' . $key . '%',
+                                'created LIKE ' => '%' . $key . '%',
+                            ]
+                        ])
+                        ->order([$sort  => $direction]);
+                    break;
+                case 'Answers':
+                    return $this->$model->find()
+                        ->select([
+                            'question' => 'Survies.question',
+                            'name',
+                            'created',
+                            'Answers.id'
+                        ])
+                        ->join([
+                            'table' => 'survies',
+                            'alias' => 'Survies',
+                            'type' => 'left',
+                            'conditions' => ['Survies.id = Answers.survey_id']
+                        ])
+                        ->where([
+                            'Answers.DELETE_FLG' => 0
+                        ])
+                        ->order([$sort => $direction]);
+                    break;
+                case 'Users':
+                    return $this->$model->find()
+                        ->select([
+                            'email',
+                            'phone',
+                            'str_status' => 'CASE WHEN status = 2 THEN "Enable" ELSE"Disable" END',
+                            'str_role' => 'CASE WHEN role = 2 THEN "Admin" ELSE"User" END'
+                        ])
+                        ->where([
+                            'DELETE_FLG' => 0,
+                            'OR' => [
+                                'email LIKE ' => '%' . $key . '%',
+                                'phone LIKE ' => '%' . $key . '%',
+                            ]
+                        ])
+                        ->order(['Users.' . $sort => $direction]);
+
+                default:
+                    break;
+            }
+        }
+    }
+
+    /**
+     * Handle get answer by survey
+     */
+    public function getAnswerBySurvey($id)
+    {
+        $query = $this->Answers->find()
+            ->where([
+                'DELETE_FLG' => 0,
+                'survey_id' => $id
+            ])
+            ->toArray();
+        return $query;
+    }
+
+    /**
+     *Handle update voted from user
+     */
+    public function updateVoted($data)
+    {
+        $query = $this->Results->query();
+        $query->update()
+            ->set(['answer_id' => $data['answer_id']])
+            ->where([
+                'user_id' => $data['user_id'],
+                'survey_id' => $data['survey_id'],
+                'category_id' => $data['category_id']
+            ])
+            ->execute();
+    }
+
+    /**
+     *Handle check isset voted from user
+     */
+    public function checkVoted($data)
+    {
+        $query = $this->Results->find()
+            ->where([
+                'category_id' => $data['category_id'],
+                'survey_id' => $data['survey_id'],
+                'answer_id' => $data['answer_id'],
+                'user_id' => $data['user_id']
+            ])
+            ->toArray();
+        return $query;
+    }
+
+    /**
+     *Handle save voted from user
+     */
+    public function insertVoted($data)
+    {
+        $query = $this->Results->query();
+        $query->insert([
+            'category_id',
+            'survey_id',
+            'answer_id',
+            'user_id',
+            'created',
+            'modified'
+        ])
+            ->values($data)
+            ->execute();
+    }
+
+    /**
+     * Handle delete voted user rechoose
+     */
+    public function deleteVoted($data)
+    {
+        $query = $this->Results->query();
+        $query->delete()
+            ->where([
+                'NOT' => [
+                    'answer_id IN' => $data['answer_id'],
+                ],
+                'category_id' => $data['category_id'],
+                'survey_id' => $data['survey_id'],
+                'user_id' => $data['user_id']
+            ])
+            ->execute();
+    }
+
+    /**
+     *Handle check category have survey
+     */
+    public function checkCategoryHaveSurvey($id)
+    {
+        $query = $this->Survies->find()
+            ->where([
+                'category_id' => $id,
+                'DELETE_FLG' => 0
+            ])
+            ->toArray();
+        return $query;
+    }
+
+    /**
+     * Handle get voted by user
+     */
+    public function getVotedByUser($category_id, $user_id)
+    {
+        $query = $this->Results->find()
+            ->where([
+                'category_id' => $category_id,
+                'user_id' => $user_id
+            ])
+            ->toArray();
+        return $query;
+    }
+
+    /**
+     * Module PHPMailer method
+     */
+    public function sendMail($to, $subject, $message)
+    {
+        date_default_timezone_set('Asia/Ho_Chi_Minh');
+        $sender = "lctiendat@gmail.com";
+        $header = "X-Mailer: PHP/" . phpversion() . "Return-Path: $sender";
+        $mail = new PHPMailer();
+        $mail->SMTPDebug  = 2;
+        $mail->IsSMTP();
+        $mail->Host = "smtp.gmail.com";
+        $mail->SMTPAuth = true;
+        $mail->Username   = "lctiendat@gmail.com";
+        $mail->Password   = "Tiendat11082000";
+        $mail->SMTPSecure = "ssl";
+        $mail->Port = 465;
+        $mail->SMTPOptions = array(
+            'tls' => array(
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+                'allow_self_signed' => true
+            ),
+            'ssl' => array(
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+                'allow_self_signed' => true
+            )
+        );
+        $mail->CharSet = 'UTF-8';
+        $mail->From = $sender;
+        $mail->FromName = "From Hệ Thống Khảo Sát";
+        $mail->AddAddress($to);
+        $mail->IsHTML(true);
+        $mail->CreateHeader($header);
+        $mail->Subject = $subject;
+        $mail->Body    = nl2br($message);
+        $mail->AltBody = nl2br($message);
+        $mail->SMTPDebug = false;
+        $mail->do_debug = 0;
+        if (!$mail->Send()) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

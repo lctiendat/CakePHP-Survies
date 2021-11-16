@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-
+setlocale(LC_ALL, 'vi_VN');
 /**
  * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
  * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
@@ -19,6 +19,7 @@ declare(strict_types=1);
  * Configure paths required to find CakePHP + general filepath constants
  */
 require __DIR__ . DIRECTORY_SEPARATOR . 'paths.php';
+require __DIR__ . DIRECTORY_SEPARATOR . 'app_const.php';
 
 /*
  * Bootstrap CakePHP.
@@ -79,6 +80,7 @@ use Cake\Utility\Security;
 try {
     Configure::config('default', new PhpConfig());
     Configure::load('app', 'default', false);
+
 } catch (\Exception $e) {
     exit($e->getMessage() . "\n");
 }

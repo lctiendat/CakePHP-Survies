@@ -1,0 +1,345 @@
+body {
+    background: #f2f2f2 url(//prod-8f86.kxcdn.com/s1/web-templates/images/bg-body.jpeg) no-repeat center top;
+}
+
+.banner h1 {
+    font-weight: bolder;
+    font-size: 50px;
+}
+
+.banner p {
+    letter-spacing: 6px;
+    font-size: 38px;
+    font-weight: bolder;
+}
+
+.banner button {
+    background: #212529;
+    padding: 16px 48px;
+    border-radius: 50px;
+    border: none;
+    color: #fff;
+    box-shadow: 5px 5px 20px 0 rgb(0 0 0 / 20%);
+    text-transform: uppercase;
+    font-weight: 600;
+    font-size: 14px;
+    white-space: nowrap;
+    margin-top: 50px;
+}
+
+button:focus,
+input:focus {
+    outline: none;
+}
+
+.disabled {
+    background: gray !important;
+}
+
+.changeinfor input {
+    font-size: 13px;
+    text-indent: 10px;
+    border: 1px solid #26ba99;
+    background: white;
+    height: 40px;
+}
+
+.changeinfor label {
+    font-size: 13px;
+    color: black;
+}
+
+.img-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.img-responsive {
+    width: 100%;
+    height: auto;
+}
+
+.img-overlay {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+}
+
+.img-overlay:before {
+    content: " ";
+    display: block;
+    /* adjust 'height' to position overlay content vertically */
+    height: 50%;
+}
+
+input #file-upload-button {
+    color: red;
+}
+
+.disabled {
+    background: gray !important;
+}
+
+.error {
+    color: red;
+    font-size: 13px !important;
+}
+
+.survey__answer--main span {
+    color: black;
+    font-size: 14px;
+}
+
+.survey__answer--main label {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin: 20px 0 10px;
+    display: block;
+    background: white !important;
+}
+
+.btn-primary {
+    border: 0 !important;
+}
+
+.survey__answer {
+    margin-top: 30px;
+}
+
+.inputchecked {
+    background: violet !important;
+    color: white;
+}
+
+.footer button:first-child {
+    background: #212529;
+    border-radius: 20px;
+    font-family: normal 75% Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    padding: 10px 30px;
+}
+
+nav {
+    border-bottom: 1px solid white;
+}
+
+.survey__answer--button button {
+    background: #212529 !important;
+    color: white;
+    border: 0;
+    font-size: 14px;
+    padding: 10px 20px;
+    margin-top: 20px;
+}
+
+.survey__description {
+    font-size: 13px;
+    color: black;
+}
+
+input:checked+.survey__answer--main {
+    background: wheat;
+}
+
+nav li a {
+    color: white !important;
+    font-size: 14px;
+}
+
+.register input {
+    background: transparent;
+    border: 1px solid white;
+    font-size: 13px;
+    color: #000 !important;
+}
+
+.register button {
+    background: #212529;
+    border: 0;
+    color: white;
+    padding: 10px 20px;
+    font-size: 13px;
+}
+
+input::placeholder {
+    color: #ccc;
+}
+
+.banner label {
+    color: black !important;
+    float: left !important;
+}
+
+.banner input {
+    font-size: 13px;
+    text-indent: 10px;
+    border: 1px solid #26ba99;
+    background: white;
+    border-radius: 10px;
+    height: 45px;
+}
+
+.register input {
+    background: transparent;
+    width: 100%;
+}
+
+.register label {
+    float: left;
+}
+
+.error {
+    color: red;
+    font-size: 13px !important;
+    float: left;
+}
+
+ul.pagination li {
+    position: relative;
+    float: left;
+    padding: 6px 12px;
+    margin-left: -1px;
+    line-height: 1.428571429;
+    text-decoration: none;
+    background: #212529;
+    border: 1px solid #ddd;
+}
+
+ul.pagination li.active {
+    position: relative;
+    float: left;
+    padding: 6px 12px;
+    margin-left: -1px;
+    line-height: 1.428571429;
+    text-decoration: none;
+    background-image: linear-gradient(-30deg, #eacda3, #d6ae7b);
+    border: 1px solid #ddd;
+}
+
+ul.pagination li a {
+    color: white;
+    text-decoration: none;
+}
+
+#survey {
+    margin-top: 150px;
+}
+
+#survey .row:first-child h1 {
+    font-size: 32px;
+    text-transform: uppercase;
+    font-weight: bolder;
+}
+
+#survey .row:first-child center:last-child div {
+    width: 100px;
+    height: 10px;
+    background: #26ba99;
+    border-radius: 5px;
+}
+
+#survey .row:nth-child(2) button {
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 5px 20px;
+}
+
+#survey .row:nth-child(4) h6 {
+    font-weight: bolder;
+    color: black;
+    font-size: 15px;
+}
+
+.footer h5 {
+    text-transform: uppercase;
+    font-size: 15px;
+    letter-spacing: 3px;
+    font-weight: bolder;
+}
+
+.footer p {
+    font-size: 13px;
+}
+
+.footer .row .col-md-4:nth-child(3) i.fa-facebook-square {
+    color: darkblue;
+    font-size: 40px;
+}
+
+.footer .row .col-md-4:nth-child(3) i:last-child {
+    color: red;
+    font-size: 40px;
+}
+
+.footer .row .col-md-4 div {
+    width: 100px;
+    height: 2px;
+    background: #212529;
+}
+
+#toTop i {
+    background: #212529;
+    padding: 10px 20px;
+}
+
+#resultEmail,
+#resultPhone,
+#resultPassword {
+    float: right;
+    margin-left: -25px;
+    margin-right: 10px;
+    margin-top: -28px;
+    position: relative;
+    z-index: 2;
+}
+
+.field-icon {
+    float: right;
+    margin-left: -25px;
+    margin-top: 13px;
+    position: relative;
+    z-index: 2;
+}
+
+.show_question {
+    margin-top: 200px;
+}
+
+.show_question .div:first-child {
+    height: 100px;
+}
+
+.register p:first-child {
+    font-size: 22px;
+}
+
+.register .form-group span {
+    color: black;
+    font-size: 13px;
+}
+
+
+/* .register .survey__answer--button a {
+    background: #212529;
+    padding: 10px 30px;
+    font-size: 14px;
+    color: white;
+    margin-top: 18px;
+    text-decoration: none;
+} */
+
+.register input {
+    border: 1px solid gray !important;
+}
+
+.register input::placeholder {
+    color: #ccc !important;
+}
+
+button.btn.btn-primary {
+    height: 40px !important;
+    border-radius: 0 !important;
+}

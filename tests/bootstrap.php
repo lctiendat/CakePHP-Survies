@@ -39,7 +39,7 @@ ConnectionManager::setConfig('test_debug_kit', [
     'className' => 'Cake\Database\Connection',
     'driver' => 'Cake\Database\Driver\Sqlite',
     'database' => TMP . 'debug_kit.sqlite',
-    'encoding' => 'utf8',
+    'encoding' => 'utf8mb4',
     'cacheMetadata' => true,
     'quoteIdentifiers' => false,
 ]);
