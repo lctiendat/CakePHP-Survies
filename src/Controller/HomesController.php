@@ -162,7 +162,7 @@ class HomesController extends AppController
                         }
                     }
                     if ($arrResult == $arrDataSameCheck) {
-                        $this->Flash->warning(__('Phần này em chưa xử lí ... '));
+                        $this->Flash->warning(__('Phần này em chưa xử lí ạ ... '));
                         return $this->redirect($this->referer());
                     } else {
                         $arrTypeSelectOnly = [];
